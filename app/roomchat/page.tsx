@@ -1,7 +1,7 @@
 'use client'
 
 import { useSearchParams } from 'next/navigation'
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { getSession } from '../functions/cookies';
 import styles from './roomchat.module.css'
 
@@ -10,6 +10,7 @@ export default function Roomchat() {
     const roomName = searchParams.get('roomname')
 
     const [userEmail, setuserEmail] = useState("");
+    const containerRef = useRef<HTMLDivElement | null>(null);
 
     async function getUserId() {
         const session = await getSession();
@@ -60,7 +61,22 @@ export default function Roomchat() {
         return 'white';
     }
 
+    async function call() {
+        console.log(process.env.NEXT_PUBLIC_BASE_URL + "api/py/fetch-messages");
+        const response = await fetch(
+            process.env.NEXT_PUBLIC_BASE_URL + "api/py/f",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              //body: JSON.stringify({ userId: 69, roomId: "8b7d5d" }),
+            }
+          );
+    }
+
     useEffect(() => {
+        call();
         getUserId();
     }, []);
 
@@ -88,8 +104,14 @@ export default function Roomchat() {
             { email: userEmail, user: "You", content: contentInput },
         ]);
         setContentInput('');
-        }
-    };
+            }
+      };
+
+    useEffect(() => {
+    if (containerRef.current) {
+        containerRef.current.scrollTop = containerRef.current.scrollHeight;
+    }
+    }, [messages]);
 
     const handleEnterPress = (event :any) => {
         if (event.key === 'Enter') {
@@ -102,7 +124,7 @@ export default function Roomchat() {
             <div className='w-full h-[5%] text-2xl font-bold'>
                 {roomName}
             </div>
-            <div className={`flex flex-col space-y-4 overflow-auto h-[85%] mr-[5px] ${styles.scrollbarthin}`}>
+            <div ref={containerRef} className={`flex flex-col space-y-4 overflow-auto h-[85%] mr-[5px] ${styles.scrollbarthin}`}>
                 <div className='h-[30px]'></div>
                 {messages.map((msg, index) => (
                     <div 
