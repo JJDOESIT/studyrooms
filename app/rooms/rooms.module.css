@@ -29,7 +29,7 @@
     color: black;
 }
 
-.createRoomContainer{
+.createRoomContainer, .joinRoomContainer{
     position: absolute;
     top: 35%;
     transform: translateY(-35%);
@@ -40,36 +40,53 @@
     background-color: white;
     border-radius: 0.5rem;
     padding: 20px;
-    transition: all linear 0.7s;
+    transition: all linear 0.2s;
+    border: 3px solid black;
 }
 
-.titleLabel{
+.titleLabel, .roomCodeLabel{
     color: black;
     font-weight: bold;
 }
 
-.titleLabel > span{
+.titleLabel > span, .roomCodeLabel > span{
     color: red;
 }
 
-.titleInput{
+.titleInput, .roomCodeInput{
     padding: 10px;
     margin-bottom: 10px;
     border: 1px solid #050505;
     border-radius: 6px;
     transition: all 0.3s ease;
+    color: black;
 }
 
-.titleInput:focus{
+.titleInput:focus, .roomCodeInput:focus{
     outline: none;
     border-color: #00a5cf;
     box-shadow: 0 0 0 2px rgba(0, 165, 207, 0.5); 
 }
 
-.titleInput:hover{
+.titleInput:hover, .roomCodeInput:hover{
     border-color: #00a5cf;
 }
 
-.initialCreateButton{
+.createButtonContainer, .joinButtonContainer{
+    display: flex;
+    justify-content: center;
+}
+
+.createButtonContainer > *, .joinButtonContainer > *{
+    margin: 0 5px 0 5px;
+}
+
+.initialButtonContainer{
+    display: flex;
     margin: 20px 0 20px 0;
+}
+
+.initialButtonContainer > div{
+    margin-right: 5px;
+    margin-left: 5px;
 }
