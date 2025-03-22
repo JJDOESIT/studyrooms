@@ -45,9 +45,7 @@ export default function Login() {
   }
 
   return (
-    <>
-      <div className={styles.background}></div>
-      <div className={styles.pageContainer}>
+      <div className={`${styles.pageContainer} animate__animated animate__fadeIn animate__slow`}>
         <div className={styles.inputContainer}>
           <label className={styles.emailLabel}>
             Email <span>*</span>
@@ -98,6 +96,5 @@ export default function Login() {
           )}
         </div>
       </div>
-    </>
   );
 }

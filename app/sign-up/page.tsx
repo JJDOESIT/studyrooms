@@ -1,5 +1,6 @@
 "use client";
 
+import Button from "@/components/Button";
 import styles from "./sign-up.module.css";
 
 import { useState } from "react";
@@ -61,9 +62,7 @@ export default function SignUp() {
   }
 
   return (
-    <>
-      <div className={styles.background}></div>
-      <div className={styles.pageContainer}>
+      <div className={`${styles.pageContainer} animate__animated animate__fadeIn animate__slow`}>
         <div className={styles.inputContainer}>
           <label className={styles.emailLabel}>
             Email <span>*</span>
@@ -110,13 +109,16 @@ export default function SignUp() {
             }}
           ></input>
           <div className={styles.submit}>
-            <input
-              type="submit"
-              value="Sign Up"
-              onClick={() => {
-                createUser();
-              }}
-            ></input>
+            <Button bgColor="bg-gray-100" hoverFromColor="from-gray-100" hoverToColor="to-blue-300">
+              <input
+                type="submit"
+                value="Sign Up"
+                className="w-full h-full"
+                onClick={() => {
+                  createUser();
+                }}
+              ></input>
+            </Button>
           </div>
           {alertType == "error" && (
             <div
@@ -136,6 +138,5 @@ export default function SignUp() {
           )}
         </div>
       </div>
-    </>
   );
 }
