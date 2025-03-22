@@ -80,7 +80,7 @@ async def create_user(user: CreateUser):
 
 
 @app.post("/api/py/login-user")
-async def create_user(user: LoginUser):
+async def login_user(user: LoginUser):
     try:
         # User not found
         if not await prisma.user.query_raw(
