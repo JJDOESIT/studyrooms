@@ -131,14 +131,15 @@ async def create_room(user: CreateRoom):
 
         # Create a room
         await prisma.query_raw(
-            'INSERT INTO "Room" ("roomId", "Title") VALUES ($1, $2)',
+            'INSERT INTO "Room" ("roomId", "title", "adminId") VALUES ($1, $2, $3)',
             roomId,
             "Test",
+            userId,
         )
 
         # Create a membership
         await prisma.query_raw(
-            'INSERT INTO "Membership" ("userId", "roomId", "Admin") VALUES ($1, $2, $3)',
+            'INSERT INTO "Membership" ("userId", "roomId", "admin") VALUES ($1, $2, $3)',
             userId,
             roomId,
             True,
@@ -170,7 +171,7 @@ async def fetch_all_rooms(user: FetchAllRooms):
 
         # Fetch all rooms
         rooms = await prisma.query_raw(
-            'SELECT * FROM "Room" WHERE "roomId" IN (SELECT "roomId" FROM "Membership" WHERE "userId" = $1)',
+            'SELECT "Room"."title", "Room"."roomId", "User"."firstName", "User"."lastName" FROM "Room" JOIN "User" ON "Room"."adminId" = "User"."userId" WHERE "roomId" IN (SELECT "roomId" FROM "Membership" WHERE "userId" = $1)',
             userId,
         )
 

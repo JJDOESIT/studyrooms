@@ -25,12 +25,13 @@ model Membership {
     membershipId Int @id @default(autoincrement())
     userId Int
     roomId String
-    Admin Boolean
+    admin Boolean
 }
 
 model Room {
     roomId String @unique @id
-    Title String
+    title String
+    adminId Int
 }
 
 model Message {
