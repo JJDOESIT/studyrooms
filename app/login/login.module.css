@@ -41,15 +41,15 @@
     box-shadow: 10px 10px 10px black;
 }
 
-.emailLabel, .passwordLabel, .firstNameLabel, .lastNameLabel{
+.emailLabel, .passwordLabel{
     font-weight: bold;
 }
 
-.emailLabel > span, .passwordLabel > span, .firstNameLabel > span, .lastNameLabel > span{
+.emailLabel > span, .passwordLabel > span{
     color: red;
 }
 
-.emailInput, .passwordInput, .firstNameInput, .lastNameInput{
+.emailInput, .passwordInput{
     padding: 10px;
     margin-bottom: 10px;
     border: 1px solid black;
