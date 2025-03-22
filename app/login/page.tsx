@@ -33,14 +33,20 @@ export default function Login() {
     }
 
     const data = await response.json();
+    // Server error
     if (data.status == 400) {
       setAlertMessage("Server Error!");
       setAlertType("error");
-    } else if (data.status == 200) {
+    }
+    // Success
+    else if (data.status == 200) {
       setAlertMessage("Logged in!");
       setAlertType("success");
+      // Set cookies
       await login(user.email);
-    } else {
+    }
+    // Invalid email/password
+    else {
       setAlertMessage("Invalid email/password combination!");
       setAlertType("error");
     }

@@ -33,7 +33,6 @@ export async function login(email: string) {
 
   // Save the session in a cookie
   cookies().set("session", session, { expires, httpOnly: true });
-  console.log("\n\n\nSuccess");
 }
 
 export async function logout() {
