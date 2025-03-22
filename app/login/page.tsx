@@ -1,5 +1,6 @@
 "use client";
 
+import { login } from "../functions/cookies";
 import styles from "./login.module.css";
 
 import { useState } from "react";
@@ -32,13 +33,20 @@ export default function Login() {
     }
 
     const data = await response.json();
+    // Server error
     if (data.status == 400) {
       setAlertMessage("Server Error!");
       setAlertType("error");
-    } else if (data.status == 200) {
+    }
+    // Success
+    else if (data.status == 200) {
       setAlertMessage("Logged in!");
       setAlertType("success");
-    } else {
+      // Set cookies
+      await login(user.email);
+    }
+    // Invalid email/password
+    else {
       setAlertMessage("Invalid email/password combination!");
       setAlertType("error");
     }
