@@ -23,18 +23,19 @@ model User {
 
 model Membership {
     userId Int @id
-    roomId Int
+    roomId String
     Admin Boolean
 }
 
 model Room {
-    roomId Int @id
+    roomId String @id
     Title String
 }
 
 model Message {
     userId Int @id
-    roomId Int
+    roomId String
     message Bytes
     date DateTime
+    flagged Boolean
 }

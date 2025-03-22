@@ -2,6 +2,8 @@ from fastapi import FastAPI
 from prisma import Prisma
 from pydantic import BaseModel
 from contextlib import asynccontextmanager
+import hashlib
+import time
 
 
 ### Create FastAPI instance with custom docs and openapi url
@@ -30,6 +32,10 @@ class CreateUser(BaseModel):
 class LoginUser(BaseModel):
     email: str
     password: str
+
+
+class CreateRoom(BaseModel):
+    email: str
 
 
 @app.post("/api/py/create-user")
@@ -90,6 +96,50 @@ async def login_user(user: LoginUser):
         ):
             # Return 404
             return {"status": 404}
+        # Return 200
+        return {"status": 200}
+    except Exception as error:
+        print(error)
+        # Return 400
+        return {"status": 400}
+
+
+@app.post("/api/py/create-room")
+async def create_room(user: CreateRoom):
+    try:
+        result = None
+
+        # User not found
+        result = await prisma.user.query_raw(
+            'SELECT * FROM "User" WHERE "email" = $1',
+            user.email,
+        )
+        if not result:
+            return {"status": 400}
+
+        # Fetch the userId
+        userId = result[0].userId
+
+        # Create random hash value
+        hash_object = hashlib.sha1()
+        hash_object.update(str(time.time() + userId).encode("utf-8"))
+        roomId = hash_object.hexdigest()[:6]
+
+        # Create a room
+        await prisma.user.query_raw(
+            'INSERT INTO "Room" ("roomId", "Title") VALUES ($1, $2)',
+            roomId,
+            "Test",
+        )
+
+        # Create a membership
+        await prisma.user.query_raw(
+            'INSERT INTO "Membership" ("userId", "roomId", "Admin") VALUES ($1, $2, $3)',
+            userId,
+            roomId,
+            True,
+        )
+
         # Return 200
         return {"status": 200}
     except Exception as error:
