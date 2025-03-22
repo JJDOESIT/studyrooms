@@ -13,7 +13,7 @@ module.exports = {
         magnolia: "#fcf7ff",
         pacificCyan: "#00a5cf",
         black: "#050505",
-        oldGold: "#bfab25",
+        oldGold: "#e1ea65",
         oldRose: "#b5838d",
       },
       fontFamily: {
