@@ -1,21 +1,35 @@
 "use client";
 
-import styles from "./page.module.css"
-import Navbar from "@/components/navbar";
+import VerticalCarousel from "@/components/verticalCarousel";
+import "animate.css/animate.min.css";
+import "@/app/globals.css";
 
 export default function Home() {
-  return (<>
-      <Navbar></Navbar>
-      <div className={styles.background}>
-      </div>
-      <div className={styles.main}>
-        <div className="w-full h-full flex-row justify-center items-center flex pr-[20%]">
-          <div>
-            <h1 className="font-montserrat text-5xl font-bold  drop-shadow-[2px_2px_0px_black]">welcome to studyrooms</h1>
-            <button className="font-montserrat text-2xl bg-oldRose border-2 border-black rounded-lg p-2">get started</button>
-          </div>
+  return (
+      <section className="flex flex-col items-center justify-center text-center py-20 px-4">
+        <h2 className="text-4xl font-bold mb-4">Welcome to Studyrooms</h2>
+        <div className="text-lg mb-6 w-[310px] text-left">
+          A collaborative space for{" "}
+          <VerticalCarousel
+            className="inline-block text-lg font-bold"
+            labels={[
+              "students",
+              "educators",
+              "learners",
+              "teachers",
+              "professors",
+              "everyone.",
+            ]}
+            animations={["fadeInUp", "fadeOutUp"]}
+            loop={false}
+          />
         </div>
-      </div>
-    </>
+        <a
+          href="#"
+          className="bg-white text-blue-600 px-6 py-3 rounded-full font-semibold text-lg shadow-md hover:bg-blue-100"
+        >
+          Get Started
+        </a>
+      </section>
   );
 }

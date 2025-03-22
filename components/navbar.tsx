@@ -1,9 +1,20 @@
-
+import "@/app/globals.css";
 
 export default function Navbar() {
-    return <div className="w-full h-[8vh] flex-row items-center flex fixed top-0 left-0 bg-oldGold border-b-2 border-black">
-        <div>
-            <h1 className="font-montserrat text-3xl text-black p-10 font-bold">studyrooms</h1>
+    return (
+      <header className="bg-white text-blue-600 py-4 shadow-md">
+        <div className="max-w-6xl mx-auto flex justify-between items-center px-4">
+          <h1 className="text-2xl font-bold">Studyrooms</h1>
+          <nav>
+            <ul className="flex gap-6 text-lg">
+              <li><a href="#" className="hover:text-blue-400">Login</a></li>
+              <li><a href="#" className="hover:text-blue-400">Sign Up</a></li>
+              <li><a href="#" className="hover:text-blue-400">About</a></li>
+              <li><a href="#" className="hover:text-blue-400">Contact</a></li>
+            </ul>
+          </nav>
         </div>
-    </div>
-}
+      </header>
+    );
+  }
+  
