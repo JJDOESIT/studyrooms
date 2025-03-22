@@ -2,6 +2,8 @@ from fastapi import FastAPI
 from prisma import Prisma
 from pydantic import BaseModel
 from contextlib import asynccontextmanager
+import hashlib
+import time
 
 
 ### Create FastAPI instance with custom docs and openapi url
@@ -32,11 +34,19 @@ class LoginUser(BaseModel):
     password: str
 
 
+class CreateRoom(BaseModel):
+    email: str
+
+
+class FetchAllRooms(BaseModel):
+    email: str
+
+
 @app.post("/api/py/create-user")
 async def create_user(user: CreateUser):
     try:
         # Email taken
-        if await prisma.user.query_raw(
+        if await prisma.query_raw(
             'SELECT * FROM "User" WHERE "email" = $1', user.email
         ):
             # Return 404
@@ -83,7 +93,7 @@ async def create_user(user: CreateUser):
 async def login_user(user: LoginUser):
     try:
         # User not found
-        if not await prisma.user.query_raw(
+        if not await prisma.query_raw(
             'SELECT * FROM "User" WHERE "email" = $1 AND "password" = $2',
             user.email,
             user.password,
@@ -92,6 +102,81 @@ async def login_user(user: LoginUser):
             return {"status": 404}
         # Return 200
         return {"status": 200}
+    except Exception as error:
+        print(error)
+        # Return 400
+        return {"status": 400}
+
+
+@app.post("/api/py/create-room")
+async def create_room(user: CreateRoom):
+    try:
+        result = None
+
+        # User not found
+        userId = await prisma.query_first(
+            'SELECT * FROM "User" WHERE "email" = $1',
+            user.email,
+        )
+        if not result:
+            return {"status": 400}
+
+        # Fetch the userId
+        print(userId)
+        userId = userId[userId]
+
+        # Create random hash value
+        hash_object = hashlib.sha1()
+        hash_object.update(str(time.time() + userId).encode("utf-8"))
+        roomId = hash_object.hexdigest()[:6]
+
+        # Create a room
+        await prisma.query_raw(
+            'INSERT INTO "Room" ("roomId", "Title") VALUES ($1, $2)',
+            roomId,
+            "Test",
+        )
+
+        # Create a membership
+        await prisma.query_raw(
+            'INSERT INTO "Membership" ("userId", "roomId", "Admin") VALUES ($1, $2, $3)',
+            userId,
+            roomId,
+            True,
+        )
+
+        # Return 200
+        return {"status": 200}
+    except Exception as error:
+        print(error)
+        # Return 400
+        return {"status": 400}
+
+
+@app.post("/api/py/fetch-all-rooms")
+async def fetch_all_rooms(user: FetchAllRooms):
+    try:
+        result = None
+
+        # User not found
+        result = await prisma.user.query_raw(
+            'SELECT * FROM "User" WHERE "email" = $1',
+            user.email,
+        )
+        if not result:
+            return {"status": 400}
+
+        # Fetch the userId
+        userId = result[0].userId
+
+        # Fetch all rooms
+        rooms = await prisma.query_raw(
+            'SELECT * FROM "Room" WHERE "roomId" IN (SELECT "roomId" FROM "Membership" WHERE "userId" = $1)',
+            userId,
+        )
+
+        # Return 200
+        return {"status": 200, "rooms": rooms}
     except Exception as error:
         print(error)
         # Return 400
