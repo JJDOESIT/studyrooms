@@ -24,8 +24,8 @@ export default function Home() {
             loop={false}
           />
         </div>
-        <Button bgColor="bg-gray-100" hoverFromColor="from-gray-100" hoverToColor="to-blue-300">
-            <a href="/sign-up" className="w-full h-full">Get Started</a>
+        <Button onClick={() => {window.location.href = "/sign-up"}}  bgColor="bg-gray-100" hoverFromColor="from-gray-100" hoverToColor="to-blue-300">
+          Get Started
         </Button>
       </section>
   );

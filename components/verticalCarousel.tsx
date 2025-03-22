@@ -26,8 +26,6 @@ export default function VerticalCarousel({
 
   useEffect(() => {
     const intervalId = setInterval(() => {
-      console.log(currentLabel);
-      console.log(labels.length);
       if (currentLabel != labels.length-1 || loop == true) {
         setCurrentLabel((currentLabel + 1) % labels.length);
         setNextLabelRef((nextLabelRef + 1) % labelRefs.length);

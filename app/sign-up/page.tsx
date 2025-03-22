@@ -109,15 +109,10 @@ export default function SignUp() {
             }}
           ></input>
           <div className={styles.submit}>
-            <Button bgColor="bg-gray-100" hoverFromColor="from-gray-100" hoverToColor="to-blue-300">
-              <input
-                type="submit"
-                value="Sign Up"
-                className="w-full h-full"
-                onClick={() => {
+            <Button onClick={() => {
                   createUser();
-                }}
-              ></input>
+                }} bgColor="bg-gray-100" hoverFromColor="from-gray-100" hoverToColor="to-blue-300">
+              Sign Up
             </Button>
           </div>
           {alertType == "error" && (
