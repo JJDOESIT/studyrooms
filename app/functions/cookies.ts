@@ -27,8 +27,8 @@ export async function login(email: string) {
 
   const user = { email };
 
-  // Create the session
-  const expires = new Date(Date.now() + 10 * 1000);
+  // Create the session for 2 hours
+  const expires = new Date(Date.now() + 1000 * 60 * 60 * 2);
   const session = await encrypt({ user, expires });
 
   // Save the session in a cookie
