@@ -1,0 +1,14 @@
+.scrollbarthin::-webkit-scrollbar-track {
+    background-color: transparent; /* Make the track invisible */
+  }
+
+  /* Style the scrollbar itself */
+  .scrollbarthin::-webkit-scrollbar {
+    width: 8px; /* Adjust width of the scrollbar */
+  }
+
+  /* Style the scrollbar thumb (handle) */
+  .scrollbarthin::-webkit-scrollbar-thumb {
+    background-color: #fbfbfb; /* Customize the thumb color */
+    border-radius: 10px; /* Optional: round corners of the thumb */
+  }
