@@ -1,5 +1,6 @@
 "use client";
 
+import { login } from "../functions/cookies";
 import styles from "./login.module.css";
 
 import { useState } from "react";
@@ -38,6 +39,7 @@ export default function Login() {
     } else if (data.status == 200) {
       setAlertMessage("Logged in!");
       setAlertType("success");
+      await login(user.email);
     } else {
       setAlertMessage("Invalid email/password combination!");
       setAlertType("error");
