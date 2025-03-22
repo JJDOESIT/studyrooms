@@ -2,13 +2,21 @@
 
 import { useEffect, useState } from "react";
 import { getSession } from "../functions/cookies";
+import styles from "./rooms.module.css";
+import hashToRGB from "../functions/hashToRgb";
+import Button from "@/components/Button";
 
 export default function Rooms() {
   const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [rooms, setRooms] = useState<null | Array<{
+    roomId: string;
+    title: string;
+    firstName: string;
+    lastName: string;
+  }>>(null);
 
   // Create a room
   async function createRoom() {
-    console.log(userEmail);
     const response = await fetch(
       process.env.NEXT_PUBLIC_BASE_URL + "api/py/create-room",
       {
@@ -25,6 +33,9 @@ export default function Rooms() {
     }
 
     const data = await response.json();
+    if (data.status == 200) {
+      fetchAllRooms();
+    }
   }
 
   // Fetch all rooms
@@ -46,7 +57,11 @@ export default function Rooms() {
     }
 
     const data = await response.json();
-    console.log(data);
+
+    if (data.status == 200) {
+      console.log(data);
+      setRooms(data.rooms);
+    }
   }
 
   async function getUserId() {
@@ -67,14 +82,30 @@ export default function Rooms() {
   }, [userEmail]);
 
   return (
-    <div>
-      <input
-        type="button"
+    <div className={styles.pageContainer}>
+      <Button
         onClick={() => {
           createRoom();
         }}
-        value="Create Room"
-      ></input>
+      >
+        Create Room
+      </Button>
+      <div className={styles.createRoomContainer}></div>
+      {rooms?.map((room) => {
+        return (
+          <div
+            className={styles.roomContainer}
+            style={{
+              background: `linear-gradient(-90deg, rgb(255, 255, 255) 97%, ${hashToRGB(
+                room.roomId
+              )} 3%)`,
+            }}
+          >
+            <p>{room.title}</p>
+            <p>{room.firstName + " " + room.lastName}</p>
+          </div>
+        );
+      })}
     </div>
   );
 }
