@@ -46,6 +46,7 @@ export default function Rooms() {
     }
 
     const data = await response.json();
+    console.log(data);
   }
 
   async function getUserId() {

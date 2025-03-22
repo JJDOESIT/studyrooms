@@ -111,19 +111,18 @@ async def login_user(user: LoginUser):
 @app.post("/api/py/create-room")
 async def create_room(user: CreateRoom):
     try:
-        result = None
-
         # User not found
         userId = await prisma.query_first(
-            'SELECT * FROM "User" WHERE "email" = $1',
+            'SELECT "userId" FROM "User" WHERE "email" = $1',
             user.email,
         )
-        if not result:
+
+        # If no user found
+        if not userId:
             return {"status": 400}
 
         # Fetch the userId
-        print(userId)
-        userId = userId[userId]
+        userId = userId["userId"]
 
         # Create random hash value
         hash_object = hashlib.sha1()
@@ -156,18 +155,18 @@ async def create_room(user: CreateRoom):
 @app.post("/api/py/fetch-all-rooms")
 async def fetch_all_rooms(user: FetchAllRooms):
     try:
-        result = None
-
         # User not found
-        result = await prisma.user.query_raw(
-            'SELECT * FROM "User" WHERE "email" = $1',
+        userId = await prisma.query_first(
+            'SELECT "userId" FROM "User" WHERE "email" = $1',
             user.email,
         )
-        if not result:
+
+        # If no user found
+        if not userId:
             return {"status": 400}
 
         # Fetch the userId
-        userId = result[0].userId
+        userId = userId["userId"]
 
         # Fetch all rooms
         rooms = await prisma.query_raw(
