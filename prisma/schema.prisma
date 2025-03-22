@@ -22,18 +22,20 @@ model User {
 }
 
 model Membership {
-    userId Int @id
+    membershipId Int @id @default(autoincrement())
+    userId Int
     roomId String
     Admin Boolean
 }
 
 model Room {
-    roomId String @id
+    roomId String @unique @id
     Title String
 }
 
 model Message {
-    userId Int @id
+    messageId Int @id @default(autoincrement())
+    userId Int
     roomId String
     message Bytes
     date DateTime
