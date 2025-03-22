@@ -54,54 +54,61 @@ export default function Login() {
   }
 
   return (
-      <div className={`${styles.pageContainer} animate__animated animate__fadeIn animate__slow`}>
-        <div className={`${styles.inputContainer}`}>
-          <label className={styles.emailLabel}>
-            Email <span>*</span>
-          </label>
-          <input
-            className={styles.emailInput}
-            type="text"
-            placeholder="johndoe@gmail.com"
-            onChange={(event) => {
-              setEmail(event.target.value);
+    <div
+      className={`${styles.pageContainer} animate__animated animate__fadeIn animate__slow`}
+    >
+      <div className={`${styles.inputContainer}`}>
+        <label className={styles.emailLabel}>
+          Email <span>*</span>
+        </label>
+        <input
+          className={styles.emailInput}
+          type="text"
+          placeholder="johndoe@gmail.com"
+          onChange={(event) => {
+            setEmail(event.target.value);
+          }}
+        ></input>
+        <label className={styles.passwordLabel}>
+          Password <span>*</span>
+        </label>
+        <input
+          className={styles.passwordInput}
+          type="password"
+          placeholder="123"
+          onChange={(event) => {
+            setPassword(event.target.value);
+          }}
+        ></input>
+        <div className={styles.submit}>
+          <Button
+            onClick={() => {
+              loginUser();
             }}
-          ></input>
-          <label className={styles.passwordLabel}>
-            Password <span>*</span>
-          </label>
-          <input
-            className={styles.passwordInput}
-            type="password"
-            placeholder="123"
-            onChange={(event) => {
-              setPassword(event.target.value);
-            }}
-          ></input>
-          <div className={styles.submit}>
-            <Button onClick={() => {
-                  loginUser();
-                }} bgColor="bg-gray-100" hoverFromColor="from-gray-100" hoverToColor="to-blue-300">
-              Sign Up
-            </Button>
-          </div>
-          {alertType == "error" && (
-            <div
-              className="alert alert-danger alert-dismissible fade show"
-              role="alert"
-            >
-              <strong>Error: </strong> {alertMessage}
-            </div>
-          )}
-          {alertType == "success" && (
-            <div
-              className="alert alert-success alert-dismissible fade show"
-              role="alert"
-            >
-              <strong>Success: </strong> {alertMessage}
-            </div>
-          )}
+            bgColor="bg-gray-100"
+            hoverFromColor="from-gray-100"
+            hoverToColor="to-blue-300"
+          >
+            Login
+          </Button>
         </div>
+        {alertType == "error" && (
+          <div
+            className="alert alert-danger alert-dismissible fade show"
+            role="alert"
+          >
+            <strong>Error: </strong> {alertMessage}
+          </div>
+        )}
+        {alertType == "success" && (
+          <div
+            className="alert alert-success alert-dismissible fade show"
+            role="alert"
+          >
+            <strong>Success: </strong> {alertMessage}
+          </div>
+        )}
       </div>
+    </div>
   );
 }

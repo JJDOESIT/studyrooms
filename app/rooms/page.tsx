@@ -8,6 +8,8 @@ import Button from "@/components/Button";
 
 export default function Rooms() {
   const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [title, setTitle] = useState("");
+  const [displayOption, setDisplayOption] = useState(""); // create/join
   const [rooms, setRooms] = useState<null | Array<{
     roomId: string;
     title: string;
@@ -83,14 +85,37 @@ export default function Rooms() {
 
   return (
     <div className={styles.pageContainer}>
-      <Button
-        onClick={() => {
-          createRoom();
-        }}
+      <div className={styles.initialCreateButton}>
+        <Button
+          onClick={() => {
+            setDisplayOption("create");
+          }}
+        >
+          Create Room
+        </Button>
+      </div>
+      <div
+        className={styles.createRoomContainer}
+        style={displayOption == "create" ? { opacity: 1 } : { opacity: 0 }}
       >
-        Create Room
-      </Button>
-      <div className={styles.createRoomContainer}></div>
+        <label className={styles.titleLabel}>
+          Class Name <span>*</span>
+        </label>
+        <input
+          className={styles.titleInput}
+          type="text"
+          placeholder="CSIS 3710"
+        ></input>
+        <div className={styles.initialCreateButton}>
+          <Button
+            onClick={() => {
+              createRoom();
+            }}
+          >
+            Create
+          </Button>
+        </div>
+      </div>
       {rooms?.map((room) => {
         return (
           <div

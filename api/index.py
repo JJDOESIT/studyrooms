@@ -181,3 +181,8 @@ async def fetch_all_rooms(user: FetchAllRooms):
         print(error)
         # Return 400
         return {"status": 400}
+
+
+@app.get("/api/py/new-route")
+async def new_route():
+    return {"message": "This is a new route!"}

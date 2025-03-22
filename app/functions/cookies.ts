@@ -38,7 +38,7 @@ export async function getSession() {
   const cookie = cookies().get("session")?.value;
   // If there is no cookie -> return null
   if (cookie == null) {
-    throw new Error("No cookie found");
+    return null;
   }
   // Decrypt the cookie
   return await decrypt(cookie);
