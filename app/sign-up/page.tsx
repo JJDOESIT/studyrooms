@@ -63,7 +63,7 @@ export default function SignUp() {
 
   return (
       <div className={`${styles.pageContainer} animate__animated animate__fadeIn animate__slow`}>
-        <div className={styles.inputContainer}>
+        <div className={`${styles.inputContainer}`}>
           <label className={styles.emailLabel}>
             Email <span>*</span>
           </label>

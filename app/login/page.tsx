@@ -1,5 +1,6 @@
 "use client";
 
+import Button from "@/components/Button";
 import { login } from "../functions/cookies";
 import styles from "./login.module.css";
 
@@ -54,7 +55,7 @@ export default function Login() {
 
   return (
       <div className={`${styles.pageContainer} animate__animated animate__fadeIn animate__slow`}>
-        <div className={styles.inputContainer}>
+        <div className={`${styles.inputContainer}`}>
           <label className={styles.emailLabel}>
             Email <span>*</span>
           </label>
@@ -78,13 +79,11 @@ export default function Login() {
             }}
           ></input>
           <div className={styles.submit}>
-            <input
-              type="submit"
-              value="Login"
-              onClick={() => {
-                loginUser();
-              }}
-            ></input>
+            <Button onClick={() => {
+                  loginUser();
+                }} bgColor="bg-gray-100" hoverFromColor="from-gray-100" hoverToColor="to-blue-300">
+              Sign Up
+            </Button>
           </div>
           {alertType == "error" && (
             <div
