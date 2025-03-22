@@ -1,27 +1,23 @@
 "use client";
 
-import styles from "./sign-up.module.css";
+import styles from "./login.module.css";
 
 import { useState } from "react";
 
-export default function SignUp() {
+export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
   const [alertMessage, setAlertMessage] = useState("");
   const [alertType, setAlertType] = useState("");
 
-  // Function to create user
-  async function createUser() {
+  // Function to login user
+  async function loginUser() {
     const user = {
       email: email,
       password: password,
-      firstName: firstName,
-      lastName: lastName,
     };
     const response = await fetch(
-      process.env.NEXT_PUBLIC_BASE_URL + "api/py/create-user",
+      process.env.NEXT_PUBLIC_BASE_URL + "api/py/login-user",
       {
         method: "POST",
         headers: {
@@ -36,26 +32,14 @@ export default function SignUp() {
     }
 
     const data = await response.json();
-    if (data.status == 200) {
-      setAlertMessage("Account created!");
-      setAlertType("success");
-    } else if (data.status == 400) {
+    if (data.status == 400) {
       setAlertMessage("Server Error!");
       setAlertType("error");
-    } else if (data.status == 404) {
-      setAlertMessage("This email is already registered!");
-      setAlertType("error");
-    } else if (data.status == 405) {
-      setAlertMessage("Email must contain an @!");
-      setAlertType("error");
-    } else if (data.status == 406) {
-      setAlertMessage("Password must contain at least 8 characters!");
-      setAlertType("error");
-    } else if (data.status == 407) {
-      setAlertMessage("First name can't be blank!");
-      setAlertType("error");
-    } else if (data.status == 408) {
-      setAlertMessage("Last name can't be blank!");
+    } else if (data.status == 200) {
+      setAlertMessage("Logged in!");
+      setAlertType("success");
+    } else {
+      setAlertMessage("Invalid email/password combination!");
       setAlertType("error");
     }
   }
@@ -87,34 +71,12 @@ export default function SignUp() {
               setPassword(event.target.value);
             }}
           ></input>
-          <label className={styles.firstNameLabel}>
-            First Name <span>*</span>
-          </label>
-          <input
-            className={styles.firstNameInput}
-            type="text"
-            placeholder="John"
-            onChange={(event) => {
-              setFirstName(event.target.value);
-            }}
-          ></input>
-          <label className={styles.lastNameLabel}>
-            Last Name <span>*</span>
-          </label>
-          <input
-            className={styles.lastNameInput}
-            type="text"
-            placeholder="Doe"
-            onChange={(event) => {
-              setLastName(event.target.value);
-            }}
-          ></input>
           <div className={styles.submit}>
             <input
               type="submit"
-              value="Sign Up"
+              value="Login"
               onClick={() => {
-                createUser();
+                loginUser();
               }}
             ></input>
           </div>

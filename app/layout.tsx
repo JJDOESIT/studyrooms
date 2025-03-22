@@ -1,5 +1,6 @@
 
 import "./globals.css";
+import "bootstrap/dist/css/bootstrap.min.css";
 import { Inter } from "next/font/google";
 import Navbar from "@/components/Navbar";
 import HomeBg from "@/components/HomeBg";

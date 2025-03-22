@@ -1,0 +1,74 @@
+.background {
+    background-image: url('/BG4.png'); /* Replace with your actual image */
+    background-size: 1000px 1000px; /* Adjust based on the image size */
+    background-position: 50vw 50vh;
+    animation: scrollBackground 10s linear infinite;
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: -1;
+    will-change: background-position;
+}
+
+@keyframes scrollBackground {
+    from {
+        background-position: 0 0;
+    }
+    to {
+        background-position: 1000px 700px;
+    }
+}
+
+.pageContainer{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+}
+
+.inputContainer{
+    display: flex;
+    flex-direction: column;
+    width: 80%;
+    height: fit-content;
+    background-color: white;
+    padding: 20px;
+    border-radius: 1rem;
+    max-width: 500px;
+    box-shadow: 10px 10px 10px black;
+}
+
+.emailLabel, .passwordLabel{
+    font-weight: bold;
+}
+
+.emailLabel > span, .passwordLabel > span{
+    color: red;
+}
+
+.emailInput, .passwordInput{
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid black;
+    border-radius: 6px;
+}
+
+.submit{
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.submit > input{
+    padding: 20px;
+    background-color: #e1ea65;
+    border-radius: 6px;
+}
+
+.submit > input:hover{
+    cursor: pointer;
+}
