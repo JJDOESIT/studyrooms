@@ -7,7 +7,13 @@ import { stringToColor } from "../functions/colors";
 import { deleteMessage, getMessages, Message, sendMessage } from "../functions/messages";
 import { getUserId } from "../functions/session";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeftCircleIcon, ArrowLeftIcon, ArrowUturnLeftIcon, CheckBadgeIcon, CheckIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { approveMessage, deleteMessage } from "../functions/messages";
+import {
+  ArrowLeftCircleIcon,
+  CheckIcon,
+  PaperClipIcon,
+  XMarkIcon,
+} from "@heroicons/react/24/outline";
 
 export default function Roomchat() {
   // URL parameters
@@ -17,6 +23,7 @@ export default function Roomchat() {
 
   // State to track the input fields, message array, and current_user
   const [contentInput, setContentInput] = useState<string>("");
+  const [fileInput, setFileInput] = useState<string>("");
   const [messages, setMessages] = useState<Message[]>([]);
   const prevLength = useRef(messages.length);
   const [userId, setuserId] = useState<number>();
@@ -71,10 +78,64 @@ export default function Roomchat() {
 
   // Function to handle adding a new message
   const addMessage = () => {
-    if (contentInput && userId) {
-      sendMessage(userId, roomId, contentInput);
-      setContentInput("");
+    if (userId) {
+      if (contentInput) {
+        sendMessage(userId, roomId, contentInput, false);
+        setContentInput("");
+      }
+      if (fileInput) {
+        console.log(fileInput);
+        sendMessage(userId, roomId, fileInput, true);
+        setFileInput("");
+      }
     }
+  };
+
+  // Fetch roster
+  async function fetchRoster(roomId: string) {
+    const response = await fetch(
+      process.env.NEXT_PUBLIC_BASE_URL + "api/py/fetch-roster",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ roomId: roomId }),
+      }
+    );
+    if (!response.ok) {
+      console.log(response.status);
+      return;
+    }
+
+    const data = await response.json();
+
+    if (data.status == 200) {
+      console.log(data.data);
+      setRoster(data.data);
+    }
+  }
+
+  // Fetch roster
+  useEffect(() => {
+    fetchRoster(roomId);
+  }, []);
+
+  // Handle image upload to base64
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+
+    reader.onloadend = () => {
+      if (reader.result && typeof reader.result === "string") {
+        // Convert image to base64 string and set it
+        console.log(reader.result);
+        setFileInput(reader.result);
+      }
+    };
   };
 
     return (
@@ -84,67 +145,136 @@ export default function Roomchat() {
                   <ArrowLeftCircleIcon height={25} width={25} className='inline mr-5 hover:cursor-pointer' onClick={() => {window.location.href = "/rooms"}}></ArrowLeftCircleIcon>
                   <p className='m-0'>{roomName}</p>
               </div>
-                <div className='min-h-[30px]'></div>
-                <AnimatePresence>
-                {messages.map((msg, index) => (
-                    <motion.li
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.3, delay: 0.2}} 
-                    key={index} 
-                    className={`flex items-start mx-4 ${msg.id === userId ? 'justify-end' : ''}`}
-                    >
-                    {
-                        <div 
-                            className={`text-black px-2 py-1 rounded-xl max-w-xs break-words border-white border-[1px] ${msg.flagged ? "bg-red-200" : "bg-white"}`}
-                        >
-                            <p 
-                                className="font-bold rounded-xl py-1 px-3 w-fit"
-                                style={{ backgroundColor: stringToColor(msg.name), color: 'white' }}
-                            >{msg.name}</p>
-                            <p>{msg.content}</p>
-                            {msg.flagged && userId &&  (
-                              <><button 
-                                  onClick={() => deleteMessage(userId, msg.messageId)}
-                                  className="rounded-lg bg-red-400 hover:bg-red-500 text-white transition py-2 px-3"
-                              >
-                                <XMarkIcon className="w-6 h-6 inline" />
-                              </button>
-                              { true &&
-                                <button 
-                                onClick={() => deleteMessage(userId, msg.messageId)}
-                                className="rounded-lg bg-green-400 hover:bg-green-500 text-white transition py-2 px-3"
-                                >
-                                  <CheckIcon className="w-6 h-6 inline" />
-                                </button>
-                              }
-                              </>
-                            )}
-                        </div>
-                    }
-                    </motion.li>
-                ))}
-                </AnimatePresence>
-                <div className='h-[30px]'></div>
-            </div>
-            
-            <div className="flex space-x-2 bg-white h-[10%] flex items-center justify-center rounded-xl mx-[5px] p-3">
-                <input
-                type="text"
-                placeholder="Message"
-                value={contentInput}
-                onKeyDown={handleKeyDown}
-                onChange={(e) => setContentInput(e.target.value)}
-                className="border p-2 rounded-md flex-grow text-black"
-                />
-                <button
-                onClick={addMessage}
-                className="bg-blue-500 text-white p-2 rounded-md"
-                >
-                Send
-                </button>
-            </div>
+            );
+          })}
+          <div className={styles.studentContainer}>Student</div>
+          {roster?.map((person) => {
+            return (
+              <div>
+                {!person.admin && (
+                  <div>{person.firstName + " " + person.lastName}</div>
+                )}
+              </div>
+            );
+          })}
         </div>
-    );
+      </div>
+      <div
+        ref={containerRef}
+        className={`flex flex-col space-y-4 overflow-auto h-[85%] mr-[5px] relative ${styles.scrollbarthin}`}
+      >
+        <div
+          ref={navBarRef}
+          className={`w-[90%] h-[50px] min-h-[50px] text-2xl font-bold bg-white rounded-xl text-black mt-[5px] shadow-md px-3 py-2 sticky top-5 mx-auto flex items-center border-1 border-black justify-between ${styles.navbarContainer}`}
+        >
+          <div className={styles.navbarLeft}>
+            <ArrowLeftCircleIcon
+              height={25}
+              width={25}
+              className="inline mr-5 hover:cursor-pointer"
+              onClick={() => {
+                window.location.href = "/rooms";
+              }}
+            ></ArrowLeftCircleIcon>
+            <p className="m-0">Room:&nbsp;</p>
+            <p className="m-0">{roomName}</p>
+          </div>
+          <button
+            onClick={() => {
+              setRosterOpen((prev) => {
+                return !prev;
+              });
+            }}
+            className="text-white rounded-md p-[5px] bg-[rgb(100,90,165)] mr-[5px]"
+          >
+            Roster
+          </button>
+        </div>
+        <div className="min-h-[30px]"></div>
+        <AnimatePresence>
+          {messages.map((msg, index) => (
+            <motion.li
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3, delay: 0.2 }}
+              key={index}
+              className={`flex items-start mx-4 ${
+                msg.id === userId ? "justify-end" : ""
+              }`}
+            >
+              {
+                <div
+                  className={`text-black px-2 py-1 rounded-xl max-w-xs break-words border-white border-[1px] ${
+                    msg.flagged ? "bg-red-200" : "bg-white"
+                  }`}
+                >
+                  <p
+                    className="px-3 py-1 font-bold rounded-xl w-fit"
+                    style={{
+                      backgroundColor: stringToColor(msg.name),
+                      color: "white",
+                    }}
+                  >
+                    {msg.name}
+                  </p>
+                  {msg.image ? (
+                    <img src={msg.message}></img>
+                  ) : (
+                    <p>{msg.message}</p>
+                  )}
+                  {msg.flagged && userId && (
+                    <>
+                      <button
+                        onClick={() => deleteMessage(userId, msg.messageId)}
+                        className="px-3 py-2 text-white transition bg-red-400 rounded-lg hover:bg-red-500"
+                      >
+                        <XMarkIcon className="inline w-6 h-6" />
+                      </button>
+                      {roster && roster[0] && roster[0].userId == userId && (
+                        <button
+                          onClick={() => approveMessage(userId, msg.messageId)}
+                          className="px-3 py-2 text-white transition bg-green-400 rounded-lg hover:bg-green-500"
+                        >
+                          <CheckIcon className="inline w-6 h-6" />
+                        </button>
+                      )}
+                    </>
+                  )}
+                </div>
+              }
+            </motion.li>
+          ))}
+        </AnimatePresence>
+        <div className="h-[30px]"></div>
+      </div>
+
+      <div className="flex items-center space-x-2 bg-white h-[10%] justify-center rounded-xl mx-[5px] p-3 ml-[24px] mr-[33px]">
+        <label className="p-2 text-gray-700 bg-gray-200 rounded-md cursor-pointer hover:bg-gray-300">
+          <PaperClipIcon width="20" height="20"></PaperClipIcon>
+          <input
+            onChange={(event) => {
+              handleImageUpload(event);
+            }}
+            type="file"
+            className="hidden"
+          />
+        </label>
+        <input
+          type="text"
+          placeholder="Message"
+          value={contentInput}
+          onKeyDown={handleKeyDown}
+          onChange={(e) => setContentInput(e.target.value)}
+          className="flex-grow p-2 text-black border rounded-md"
+        />
+        <button
+          onClick={addMessage}
+          className="p-2 text-white bg-blue-500 rounded-md hover:bg-blue-600"
+        >
+          Send
+        </button>
+      </div>
+    </div>
+  );
 }

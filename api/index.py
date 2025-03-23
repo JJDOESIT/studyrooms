@@ -8,7 +8,9 @@ import time
 import openai
 import os
 from dotenv import load_dotenv
-
+import base64
+from PIL import Image
+import io
 
 load_dotenv()  # Load environment variables from .env
 client = openai.OpenAI(
@@ -103,6 +105,8 @@ class SendMessage(BaseModel):
     userId: int
     roomId: str
     content: str
+    image: bool
+
 
 class DeleteMessage(BaseModel):
     messageId: int
@@ -391,11 +395,12 @@ async def fetch_messages(info: FetchMessages):
 
         messages = await prisma.query_raw(
             """
-            SELECT 
+            SELECT
                 m."messageId" AS "messageId",
-                u."userId" AS "id", 
-                u."firstName" || ' ' || u."lastName" AS "name", 
-                m."message" AS "content",
+                u."userId" AS "id",
+                u."firstName" || ' ' || u."lastName" AS "name",
+                m."image" AS "image",
+                m."message" AS "message",
                 m."flagged" as "flagged"
             FROM "Message" m
             JOIN "User" u ON m."userId" = u."userId"
@@ -403,7 +408,8 @@ async def fetch_messages(info: FetchMessages):
             WHERE mshp."roomId" = $1 AND (m."flagged" = FALSE or m."userId" = $2) AND m."roomId" = $1
             ORDER BY m."date" ASC
             """,
-            info.roomId, info.userId
+            info.roomId,
+            info.userId,
         )
 
         return {"status": 200, "messages": messages}
@@ -414,8 +420,50 @@ async def fetch_messages(info: FetchMessages):
         return {"status": 400, "error": str(error)}
 
 
+@app.post("/api/py/delete-message")
+async def delete_message(data: DeleteMessage):
+    try:
+        # Delete the message if it belongs to the user
+        deleted_message = await prisma.execute_raw(
+            'DELETE FROM "Message" WHERE "messageId" = $1 AND "userId" = $2 RETURNING *',
+            data.messageId,
+            data.userId,
+        )
+
+        if deleted_message:
+            return {"status": 200, "message": "Message deleted successfully"}
+        else:
+            return {"status": 404, "error": "Message not found or unauthorized"}
+
+    except Exception as error:
+        print(error)
+        return {"status": 400, "error": str(error)}
+
+
+@app.post("/api/py/approve-message")
+async def approve_message(
+    data: DeleteMessage,
+):  # Consider renaming DeleteMessage to a more appropriate model
+    try:
+        # Approve the message by setting flagged = false if it belongs to the user
+        updated_message = await prisma.execute_raw(
+            'UPDATE "Message" SET "flagged" = false WHERE "messageId" = $1 AND "userId" = $2 RETURNING *',
+            data.messageId,
+            data.userId,
+        )
+
+        if updated_message:
+            return {"status": 200, "message": "Message approved successfully"}
+        else:
+            return {"status": 404, "error": "Message not found or unauthorized"}
+
+    except Exception as error:
+        print(error)
+        return {"status": 400, "error": str(error)}
+
+
 @app.post("/api/py/send-message")
-async def fetch_messages(data: SendMessage):
+async def send_messages(data: SendMessage):
     try:
         membership = await prisma.query_raw(
             'SELECT * FROM "Membership" WHERE "userId" = $1 AND "roomId" = $2',
@@ -429,7 +477,9 @@ async def fetch_messages(data: SendMessage):
 
         sfw = is_safe_for_work(data.content)
 
-        print(data.content)
+        # print(len(data.content))
+        # data.content = compress_image(data.content, 1)
+        # print(len(data.content))
 
         message = await prisma.message.create(
             data={
@@ -438,6 +488,7 @@ async def fetch_messages(data: SendMessage):
                 "message": data.content,  # Store as Bytes
                 "date": datetime.now(timezone.utc),
                 "flagged": not sfw,
+                "image": data.image,
             }
         )
         return {"status": 200, "messageId": message.messageId}
