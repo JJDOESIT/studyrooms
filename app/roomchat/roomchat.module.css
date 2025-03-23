@@ -23,8 +23,25 @@
     display: flex;
     align-items: center;
     flex-direction: column;
-    right: 0;
+    right: -300px;
     border-top-left-radius: 1rem;
+    transition: all ease-in-out 300ms;
+    overflow-y: auto;
+  }
+
+  .rosterSidebar::-webkit-scrollbar-track {
+    background-color: transparent; /* Make the track invisible */
+  }
+
+  /* Style the scrollbar itself */
+  .rosterSidebar::-webkit-scrollbar {
+    width: 8px; /* Adjust width of the scrollbar */
+  }
+
+  /* Style the scrollbar thumb (handle) */
+  .rosterSidebar::-webkit-scrollbar-thumb {
+    background-color: #fbfbfb; /* Customize the thumb color */
+    border-radius: 10px; /* Optional: round corners of the thumb */
   }
 
   .rosterContainer{
@@ -38,4 +55,9 @@
     font-weight: bold;
     font-size: 2rem;
     border-bottom: 4px solid rgb(255, 255, 255);
+  }
+
+  .navbarLeft{
+    display: flex;
+    align-items: center;
   }

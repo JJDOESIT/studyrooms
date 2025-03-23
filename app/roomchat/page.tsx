@@ -12,6 +12,7 @@ import {
   ArrowLeftIcon,
   ArrowUturnLeftIcon,
 } from "@heroicons/react/24/outline";
+import Button from "@/components/Button";
 
 export default function Roomchat() {
   // URL parameters
@@ -24,6 +25,8 @@ export default function Roomchat() {
   const [messages, setMessages] = useState<Message[]>([]);
   const prevLength = useRef(messages.length);
   const [userId, setuserId] = useState<number>();
+  const [rosterOpen, setRosterOpen] = useState(false);
+  const sideBarRef = useRef<HTMLDivElement>(null);
 
   // Roster
   const [roster, setRoster] = useState<Array<{
@@ -118,8 +121,16 @@ export default function Roomchat() {
   }, []);
 
   return (
-    <div className="relative w-full h-full animate__animated animate__fadeIn animate__slow">
-      <div className={styles.rosterSidebar}>
+    <div className="relative w-full h-full overflow-hidden animate__animated animate__fadeIn animate__slow">
+      <div
+        className={styles.rosterSidebar}
+        ref={sideBarRef}
+        style={
+          rosterOpen
+            ? { transform: "translateX(-300px)" }
+            : { transform: "translateX(0px)" }
+        }
+      >
         <div className={styles.rosterContainer}>
           <div className={styles.adminContainer}>Admin</div>
           {roster?.map((person) => {
@@ -149,16 +160,28 @@ export default function Roomchat() {
         ref={containerRef}
         className={`flex flex-col space-y-4 overflow-auto h-[85%] mr-[5px] relative ${styles.scrollbarthin}`}
       >
-        <div className="w-[90%] h-[50px] min-h-[50px] text-2xl font-bold bg-white rounded-xl text-black mt-[5px] shadow-md px-3 py-2 sticky top-5 mx-auto flex items-center border-1 border-black">
-          <ArrowLeftCircleIcon
-            height={25}
-            width={25}
-            className="inline mr-5 hover:cursor-pointer"
+        <div className="w-[90%] h-[50px] min-h-[50px] text-2xl font-bold bg-white rounded-xl text-black mt-[5px] shadow-md px-3 py-2 sticky top-5 mx-auto flex items-center border-1 border-black justify-between">
+          <div className={styles.navbarLeft}>
+            <ArrowLeftCircleIcon
+              height={25}
+              width={25}
+              className="inline mr-5 hover:cursor-pointer"
+              onClick={() => {
+                window.location.href = "/rooms";
+              }}
+            ></ArrowLeftCircleIcon>
+            <p className="m-0">Room:&nbsp;</p>
+            <p className="m-0">{roomName}</p>
+          </div>
+          <Button
             onClick={() => {
-              window.location.href = "/rooms";
+              setRosterOpen((prev) => {
+                return !prev;
+              });
             }}
-          ></ArrowLeftCircleIcon>
-          <p className="m-0">{roomName}</p>
+          >
+            Roster
+          </Button>
         </div>
         <div className="min-h-[30px]"></div>
         <AnimatePresence>
