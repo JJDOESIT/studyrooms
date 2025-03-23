@@ -49,13 +49,34 @@ export async function login(email: string) {
   const cookieExpires = new Date(
     Date.now() + parseInt(process.env.SESSION_TIME!)
   );
+
+  const id = await getIdByEmail(email);
+
+  console.log(id);
+
   //Create a signed session
-  const cookie = await cookieEncrypt({ email, cookieExpires });
+  const cookie = await cookieEncrypt({ email, cookieExpires, id});
   // Save the session in a cookie
   cookies().set("session", cookie, {
     expires: cookieExpires,
     httpOnly: true,
   });
+}
+
+export async function getIdByEmail(email:string) {
+    const response = await fetch(
+      process.env.NEXT_PUBLIC_BASE_URL + "api/py/fetch-id",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ userEmail: email}),
+      }
+    );
+
+  const data = await response.json();
+  return data.id;
 }
 
 export async function updateSession(request: NextRequest) {
