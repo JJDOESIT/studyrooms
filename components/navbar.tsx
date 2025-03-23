@@ -17,7 +17,7 @@ export default function Navbar() {
     }, [])
 
     return (
-      <header className="bg-white text-blue-600 py-1 shadow-md h-[10vh] flex justify-center items-center">
+      <header className="bg-white text-blue-600 py-1 shadow-md h-[10vh] flex justify-center items-center relative">
         <div className="max-w-6xl mx-auto flex justify-between items-center px-4 w-full">
           <div className="flex items-center">
           <Door className="w-8 h-8 text-blue-600 inline md:w-16 md:h-16"/>
