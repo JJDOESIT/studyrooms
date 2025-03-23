@@ -407,7 +407,11 @@ async def fetch_messages(info: FetchMessages):
             FROM "Message" m
             JOIN "User" u ON m."userId" = u."userId"
             JOIN "Membership" mshp ON mshp."userId" = u."userId"
-            WHERE mshp."roomId" = $1 AND (m."flagged" = FALSE or m."userId" = $2) AND m."roomId" = $1
+            WHERE mshp."roomId" = $1 
+                AND (m."flagged" = FALSE 
+                    OR m."userId" = $2 
+                    OR (SELECT "adminId" FROM "Room" WHERE "roomId" = $1) = $2)
+                AND m."roomId" = $1
             ORDER BY m."date" ASC
             """,
             info.roomId,
@@ -427,7 +431,15 @@ async def delete_message(data: DeleteMessage):
     try:
         # Delete the message if it belongs to the user
         deleted_message = await prisma.execute_raw(
-            'DELETE FROM "Message" WHERE "messageId" = $1 AND "userId" = $2 RETURNING *',
+            """DELETE FROM "Message" 
+                WHERE "messageId" = $1 
+                AND (
+                    "userId" = $2 OR 
+                    (SELECT "adminId" FROM "Room" WHERE "roomId" = 
+                        (SELECT "roomId" FROM "Message" WHERE "messageId" = $1)
+                    ) = $2
+                ) RETURNING *
+            """,
             data.messageId,
             data.userId,
         )
@@ -449,7 +461,15 @@ async def approve_message(
     try:
         # Approve the message by setting flagged = false if it belongs to the user
         updated_message = await prisma.execute_raw(
-            'UPDATE "Message" SET "flagged" = false WHERE "messageId" = $1 AND "userId" = $2 RETURNING *',
+            """UPDATE "Message" SET "flagged" = false
+                WHERE "messageId" = $1 
+                AND (
+                    "userId" = $2 OR 
+                    (SELECT "adminId" FROM "Room" WHERE "roomId" = 
+                        (SELECT "roomId" FROM "Message" WHERE "messageId" = $1)
+                    ) = $2
+                ) RETURNING *
+            """,
             data.messageId,
             data.userId,
         )
@@ -498,4 +518,24 @@ async def send_messages(data: SendMessage):
     except Exception as error:
         print(error)
         # Return 400
+        return {"status": 400, "error": str(error)}
+
+
+@app.post("/api/py/delete-message")
+async def delete_message(data: DeleteMessage):
+    try:
+        # Delete the message if it belongs to the user
+        deleted_message = await prisma.execute_raw(
+            'DELETE FROM "Message" WHERE "messageId" = $1 AND "userId" = $2 RETURNING *',
+            data.messageId,
+            data.userId,
+        )
+
+        if deleted_message:
+            return {"status": 200, "message": "Message deleted successfully"}
+        else:
+            return {"status": 404, "error": "Message not found or unauthorized"}
+
+    except Exception as error:
+        print(error)
         return {"status": 400, "error": str(error)}

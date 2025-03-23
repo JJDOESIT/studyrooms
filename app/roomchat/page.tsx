@@ -65,7 +65,7 @@ export default function Roomchat() {
           setMessages(data);
         });
       }
-    }, 100);
+    }, 3000);
     return () => clearInterval(interval); // Cleanup on unmount
   }, [userId]);
 
