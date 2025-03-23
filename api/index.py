@@ -53,6 +53,11 @@ class JoinRoom(BaseModel):
     roomId: str
 
 
+class LeaveRoom(BaseModel):
+    userId: int
+    roomId: str
+
+
 class FetchMessages(BaseModel):
     userId: int
     roomId: str
@@ -239,6 +244,21 @@ async def join_room(user: JoinRoom):
     try:
         await prisma.query_raw(
             'INSERT INTO "Membership" ("userId", "roomId", "admin") VALUES ($1, $2, FALSE)',
+            user.userId,
+            user.roomId,
+        )
+        return {"status": 200}
+    except Exception as error:
+        print(error)
+        # Return 400
+        return {"status": 400}
+
+
+@app.post("/api/py/leave-room")
+async def leave_room(user: LeaveRoom):
+    try:
+        await prisma.query_raw(
+            'DELETE FROM "Membership" WHERE "userId" = $1 AND "roomId" = $2',
             user.userId,
             user.roomId,
         )
