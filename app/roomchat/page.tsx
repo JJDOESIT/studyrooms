@@ -7,6 +7,7 @@ import { stringToColor } from '../functions/colors';
 import { getMessages, Message, sendMessage } from '../functions/messages';
 import { getUserId } from '../functions/session';
 import { motion, AnimatePresence } from "framer-motion";
+import { ArrowLeftCircleIcon, ArrowLeftIcon, ArrowUturnLeftIcon } from '@heroicons/react/24/outline';
 
 export default function Roomchat() {
   // URL parameters
@@ -79,11 +80,12 @@ export default function Roomchat() {
 
     return (
         <div className='w-full h-full animate__animated animate__fadeIn animate__slow'>
-            <div className='w-full h-[5%] text-2xl font-bold'>
-                {roomName}
-            </div>
-            <div ref={containerRef} className={`flex flex-col space-y-4 overflow-auto h-[85%] mr-[5px] ${styles.scrollbarthin}`}>
-                <div className='h-[30px]'></div>
+            <div ref={containerRef} className={`flex flex-col space-y-4 overflow-auto h-[85%] mr-[5px] relative ${styles.scrollbarthin}`}>
+              <div className='w-[90%] h-[50px] min-h-[50px] text-2xl font-bold bg-white rounded-xl text-black mt-[5px] shadow-md px-3 py-2 sticky top-5 mx-auto flex items-center border-1 border-black'>
+                  <ArrowLeftCircleIcon height={25} width={25} className='inline mr-5 hover:cursor-pointer' onClick={() => {window.location.href = "/rooms"}}></ArrowLeftCircleIcon>
+                  <p className='m-0'>{roomName}</p>
+              </div>
+                <div className='min-h-[30px]'></div>
                 <AnimatePresence>
                 {messages.map((msg, index) => (
                     <motion.li
