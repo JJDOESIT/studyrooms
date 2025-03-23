@@ -218,6 +218,7 @@ async def fetch_id(email: FetchId):
 
 @app.post("/api/py/fetch-messages")
 async def fetch_messages(info: FetchMessages):
+    print(info.userId, info.roomId)
     try:
         membership = await prisma.query_raw(
             'SELECT * FROM "Membership" WHERE "userId" = $1 AND "roomId" = $2', info.userId, info.roomId
@@ -261,13 +262,13 @@ async def fetch_messages(data: SendMessage):
             # Return 404 if not in that room
             return {"status": 401, "error" : "Not a member of that room!"}
 
-        encoded_message = data.content.encode("utf-8")
+        #encoded_message = data.content.encode("utf-8")
 
         message = await prisma.message.create(
             data={
                 "userId": data.userId,
                 "roomId": data.roomId,
-                "message": encoded_message,  # Store as Bytes
+                "message": data.content,  # Store as Bytes
                 "date": datetime.now(timezone.utc),
                 "flagged": False,
             }
