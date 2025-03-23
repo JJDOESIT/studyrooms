@@ -246,9 +246,9 @@ function RoomchatInner() {
           >
             <div className={styles.rosterContainer}>
               <div className={styles.adminContainer}>Admin</div>
-              {roster?.map((person) => {
+              {roster?.map((person, index) => {
                 return (
-                  <div>
+                  <div key={index}>
                     {person.admin && (
                       <div className="font-bold">
                         {person.firstName + " " + person.lastName}
@@ -258,9 +258,9 @@ function RoomchatInner() {
                 );
               })}
               <div className={styles.studentContainer}>Student</div>
-              {roster?.map((person) => {
+              {roster?.map((person, index) => {
                 return (
-                  <div className={styles.rosterStudent}>
+                  <div key={index} className={styles.rosterStudent}>
                     {!person.admin && (
                       <>
                         {" "}
