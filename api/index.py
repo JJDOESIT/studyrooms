@@ -44,6 +44,10 @@ class FetchAllRooms(BaseModel):
     email: str
 
 
+class DeleteRoom(BaseModel):
+    roomId: str
+
+
 class FetchMessages(BaseModel):
     userId: int
     roomId: str
@@ -188,12 +192,29 @@ async def fetch_all_rooms(user: FetchAllRooms):
 
         # Fetch all rooms
         rooms = await prisma.query_raw(
-            'SELECT "Room"."title", "Room"."roomId", "Room"."adminId", "User"."firstName", "User"."lastName" FROM "Room" JOIN "User" ON "Room"."adminId" = "User"."userId" WHERE "roomId" IN (SELECT "roomId" FROM "Membership" WHERE "userId" = $1)',
+            'SELECT "Room"."title", "Room"."roomId", "Room"."adminId", "User"."firstName", "User"."lastName" '
+            'FROM "Room" '
+            'JOIN "User" ON "Room"."adminId" = "User"."userId" '
+            'WHERE "roomId" IN (SELECT "roomId" FROM "Membership" WHERE "userId" = $1)',
             userId,
         )
 
         # Return 200
         return {"status": 200, "rooms": rooms}
+    except Exception as error:
+        print(error)
+        # Return 400
+        return {"status": 400}
+
+
+@app.post("/api/py/delete-room")
+async def delete_room(user: DeleteRoom):
+    try:
+        await prisma.query_first(
+            'SELECT "userId" FROM "User" WHERE "email" = $1',
+            user.email,
+        )
+        return {"status": 200}
     except Exception as error:
         print(error)
         # Return 400
@@ -222,7 +243,6 @@ async def fetch_id(email: FetchId):
 
 @app.post("/api/py/fetch-messages")
 async def fetch_messages(info: FetchMessages):
-    print(info.userId, info.roomId)
     try:
         membership = await prisma.query_raw(
             'SELECT * FROM "Membership" WHERE "userId" = $1 AND "roomId" = $2',
@@ -272,13 +292,13 @@ async def fetch_messages(data: SendMessage):
             # Return 404 if not in that room
             return {"status": 401, "error": "Not a member of that room!"}
 
-        #encoded_message = data.content.encode("utf-8")
+        encoded_message = data.content.encode("utf-8")
 
         message = await prisma.message.create(
             data={
                 "userId": data.userId,
                 "roomId": data.roomId,
-                "message": data.content,  # Store as Bytes
+                "message": encoded_message,  # Store as Bytes
                 "date": datetime.now(timezone.utc),
                 "flagged": False,
             }
