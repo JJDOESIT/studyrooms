@@ -204,9 +204,9 @@ export default function Roomchat() {
             );
           })}
           <div className={styles.studentContainer}>Student</div>
-          {roster?.map((person) => {
+          {roster?.map((person, index) => {
             return (
-              <div className={styles.rosterStudent}>
+              <div className={styles.rosterStudent} key={index}>
                 {!person.admin && (
                   <>
                     {" "}
