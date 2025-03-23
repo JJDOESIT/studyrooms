@@ -48,6 +48,11 @@ class DeleteRoom(BaseModel):
     roomId: str
 
 
+class JoinRoom(BaseModel):
+    userId: int
+    roomId: str
+
+
 class FetchMessages(BaseModel):
     userId: int
     roomId: str
@@ -211,8 +216,31 @@ async def fetch_all_rooms(user: FetchAllRooms):
 async def delete_room(user: DeleteRoom):
     try:
         await prisma.query_first(
-            'SELECT "userId" FROM "User" WHERE "email" = $1',
-            user.email,
+            'DELETE FROM "Room" WHERE "roomId" = $1',
+            user.roomId,
+        )
+        await prisma.query_first(
+            'DELETE FROM "Membership" WHERE "roomId" = $1',
+            user.roomId,
+        )
+        await prisma.query_first(
+            'DELETE FROM "Message" WHERE "roomId" = $1',
+            user.roomId,
+        )
+        return {"status": 200}
+    except Exception as error:
+        print(error)
+        # Return 400
+        return {"status": 400}
+
+
+@app.post("/api/py/join-room")
+async def join_room(user: JoinRoom):
+    try:
+        await prisma.query_raw(
+            'INSERT INTO "Membership" ("userId", "roomId", "admin") VALUES ($1, $2, FALSE)',
+            user.userId,
+            user.roomId,
         )
         return {"status": 200}
     except Exception as error:
