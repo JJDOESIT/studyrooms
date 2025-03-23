@@ -308,7 +308,8 @@ export default function Rooms() {
               <p>{room.firstName + " " + room.lastName}</p>
               {room.adminId == userId ? (
                 <TrashIcon
-                  onClick={() => {
+                  onClick={(event) => {
+                    event.stopPropagation();
                     deleteRoom(room.roomId);
                   }}
                   className={styles.trashIcon}
