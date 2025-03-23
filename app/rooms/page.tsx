@@ -9,7 +9,7 @@ import {
   TrashIcon,
   ArrowLeftStartOnRectangleIcon,
 } from "@heroicons/react/24/outline";
-import { join } from "path";
+import { AnimatePresence, motion } from "framer-motion";
 
 export default function Rooms() {
   const [userEmail, setUserEmail] = useState<string | null>(null);
@@ -202,7 +202,7 @@ export default function Rooms() {
 
   return (
     <div
-      className={`${styles.pageContainer} animate__animated animate__fadeIn animate__slow`}
+      className={`${styles.pageContainer} ${styles.scrollbarthin} animate__animated animate__fadeIn animate__slow overflow-y-auto`}
     >
       <div className={styles.initialButtonContainer}>
         <div>
@@ -318,19 +318,25 @@ export default function Rooms() {
           </Button>
         </div>
       </div>
-      {rooms?.map((room) => {
+      <AnimatePresence>
+      {rooms?.map((room, index) => {
         return (
-          <div
-            onClick={() => {
-              window.location.href = "/roomchat?room=" + room.roomId;
-            }}
-            className={styles.roomContainer}
-            style={{
-              background: `linear-gradient(-90deg, rgb(255, 255, 255) 97%, ${hashToRGB(
-                room.roomId
-              )} 3%)`,
-            }}
-          >
+          <motion.li
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.3, delay: 0.1 * index}} 
+          key={index} 
+          className={styles.roomContainer}
+          style={{
+            background: `linear-gradient(-90deg, rgb(255, 255, 255) 97%, ${hashToRGB(
+              room.roomId
+            )} 3%)`,
+          }}
+          onClick={() => {
+            window.location.href = "/roomchat?room=" + room.roomId + "&roomname=" + room.title;
+          }}
+          > 
             <div className={styles.roomLeftContainer}>
               <p>{room.title}</p>
               {userId == room.adminId && <p>{room.roomId}</p>}
@@ -361,9 +367,10 @@ export default function Rooms() {
                 ></ArrowLeftStartOnRectangleIcon>
               )}
             </div>
-          </div>
+          </motion.li>
         );
       })}
+      </AnimatePresence>
     </div>
   );
 }

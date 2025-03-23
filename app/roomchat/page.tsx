@@ -62,6 +62,13 @@ export default function Roomchat() {
       prevLength.current = messages.length;
     }, [messages]);
 
+  const handleKeyDown = (event: any) => {
+    if (event.key === "Enter") {
+      event.preventDefault(); // Prevent form submission (if inside a form)
+      addMessage();
+    }
+  };
+
   // Function to handle adding a new message
   const addMessage = () => {
     if (contentInput && userId) {
@@ -109,6 +116,7 @@ export default function Roomchat() {
                 type="text"
                 placeholder="Message"
                 value={contentInput}
+                onKeyDown={handleKeyDown}
                 onChange={(e) => setContentInput(e.target.value)}
                 className="border p-2 rounded-md flex-grow text-black"
                 />
