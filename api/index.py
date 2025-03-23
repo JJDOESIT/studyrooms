@@ -43,17 +43,21 @@ class CreateRoom(BaseModel):
 class FetchAllRooms(BaseModel):
     email: str
 
+
 class FetchMessages(BaseModel):
     userId: int
     roomId: str
 
+
 class FetchId(BaseModel):
     userEmail: str
+
 
 class SendMessage(BaseModel):
     userId: int
     roomId: str
     content: str
+
 
 @app.post("/api/py/create-user")
 async def create_user(user: CreateUser):
@@ -184,7 +188,7 @@ async def fetch_all_rooms(user: FetchAllRooms):
 
         # Fetch all rooms
         rooms = await prisma.query_raw(
-            'SELECT "Room"."title", "Room"."roomId", "User"."firstName", "User"."lastName" FROM "Room" JOIN "User" ON "Room"."adminId" = "User"."userId" WHERE "roomId" IN (SELECT "roomId" FROM "Membership" WHERE "userId" = $1)',
+            'SELECT "Room"."title", "Room"."roomId", "Room"."adminId", "User"."firstName", "User"."lastName" FROM "Room" JOIN "User" ON "Room"."adminId" = "User"."userId" WHERE "roomId" IN (SELECT "roomId" FROM "Membership" WHERE "userId" = $1)',
             userId,
         )
 
@@ -204,16 +208,16 @@ async def fetch_id(email: FetchId):
             'SELECT "userId" FROM "User" WHERE "email" = $1', email.userEmail
         )
         if id_record == None:
-            return {"status": 400, "error" : "No such user has that email"}
-        
+            return {"status": 400, "error": "No such user has that email"}
+
         user_id = id_record[0]["userId"]
 
         return {"status": 200, "id": user_id}
-    
+
     except Exception as error:
         print(error)
         # Return 400
-        return {"status": 400, "error" : str(error)}
+        return {"status": 400, "error": str(error)}
 
 
 @app.post("/api/py/fetch-messages")
@@ -221,15 +225,17 @@ async def fetch_messages(info: FetchMessages):
     print(info.userId, info.roomId)
     try:
         membership = await prisma.query_raw(
-            'SELECT * FROM "Membership" WHERE "userId" = $1 AND "roomId" = $2', info.userId, info.roomId
+            'SELECT * FROM "Membership" WHERE "userId" = $1 AND "roomId" = $2',
+            info.userId,
+            info.roomId,
         )
 
         if len(membership) == 0:
             # Return 404 if not in that room
-            return {"status": 401, "error" : "Not a member of that room!"}
+            return {"status": 401, "error": "Not a member of that room!"}
 
         messages = await prisma.query_raw(
-            '''
+            """
             SELECT 
                 u."userId" AS "id", 
                 u."firstName" || ' ' || u."lastName" AS "name", 
@@ -239,28 +245,32 @@ async def fetch_messages(info: FetchMessages):
             JOIN "Membership" mshp ON mshp."userId" = u."userId"
             WHERE mshp."roomId" = $1
             ORDER BY m."date" ASC
-            ''', info.roomId
+            """,
+            info.roomId,
         )
 
         print(messages)
 
-        return {"status": 200, "messages" : messages}
-    
+        return {"status": 200, "messages": messages}
+
     except Exception as error:
         print(error)
         # Return 400
-        return {"status": 400, "error" : str(error)}
-    
+        return {"status": 400, "error": str(error)}
+
+
 @app.post("/api/py/send-message")
 async def fetch_messages(data: SendMessage):
     try:
         membership = await prisma.query_raw(
-            'SELECT * FROM "Membership" WHERE "userId" = $1 AND "roomId" = $2', data.userId, data.roomId
+            'SELECT * FROM "Membership" WHERE "userId" = $1 AND "roomId" = $2',
+            data.userId,
+            data.roomId,
         )
 
         if len(membership) == 0:
             # Return 404 if not in that room
-            return {"status": 401, "error" : "Not a member of that room!"}
+            return {"status": 401, "error": "Not a member of that room!"}
 
         #encoded_message = data.content.encode("utf-8")
 
@@ -274,8 +284,8 @@ async def fetch_messages(data: SendMessage):
             }
         )
         return {"status": 200, "messageId": message.messageId}
-    
+
     except Exception as error:
         print(error)
         # Return 400
-        return {"status": 400, "error" : str(error)}
+        return {"status": 400, "error": str(error)}

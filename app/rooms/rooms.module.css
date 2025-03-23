@@ -17,12 +17,16 @@
     margin-bottom: 20px;
 }
 
+.roomContainer:hover{
+    cursor: pointer;
+}
+
 .roomContainer > p:first-child{
     font-weight: bold;
     margin-left: 5%;
 }
 
-.roomContainer > p{
+.roomContainer p{
     align-items: center;
     text-align: center;
     margin: 0;
@@ -89,4 +93,21 @@
 .initialButtonContainer > div{
     margin-right: 5px;
     margin-left: 5px;
+}
+
+.roomRightContainer{
+    display: flex;
+    align-items: center;
+}
+
+.roomRightContainer > p:first-child{
+    padding-right: 5px;
+}
+
+.trashIcon{
+    display: none;
+}
+
+.roomContainer:hover .trashIcon{
+    display: flex;
 }

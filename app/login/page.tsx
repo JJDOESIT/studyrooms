@@ -45,6 +45,7 @@ export default function Login() {
       setAlertType("success");
       // Set cookies
       await login(user.email);
+      window.location.href = "/rooms";
     }
     // Invalid email/password
     else {

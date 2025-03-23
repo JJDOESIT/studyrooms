@@ -5,15 +5,21 @@ import { getSession } from "../functions/cookies";
 import styles from "./rooms.module.css";
 import hashToRGB from "../functions/hashToRgb";
 import Button from "@/components/Button";
+import {
+  TrashIcon,
+  ArrowLeftStartOnRectangleIcon,
+} from "@heroicons/react/24/outline";
 
 export default function Rooms() {
   const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [userId, setUserId] = useState<number | null>(null);
   const [title, setTitle] = useState("");
   const [roomCode, setRoomCode] = useState("");
   const [displayOption, setDisplayOption] = useState("");
   const [rooms, setRooms] = useState<null | Array<{
     roomId: string;
     title: string;
+    adminId: number;
     firstName: string;
     lastName: string;
   }>>(null);
@@ -68,17 +74,23 @@ export default function Rooms() {
     }
   }
 
+  // Set the user id and email
   async function getUserId() {
     const session = await getSession();
-    if (session && session.email) {
+    if (session && session.email && session.id) {
       setUserEmail(session.email as string);
+      setUserId(session.id as number);
+    } else {
+      window.location.href = "/login";
     }
   }
 
+  // Set the user id and email on render
   useEffect(() => {
     getUserId();
   }, []);
 
+  // Fetch all rooms once the user is authenticated
   useEffect(() => {
     if (userEmail) {
       fetchAllRooms();
@@ -111,7 +123,11 @@ export default function Rooms() {
       </div>
       <div
         className={styles.createRoomContainer}
-        style={displayOption == "create" ? { opacity: 1 } : { opacity: 0 }}
+        style={
+          displayOption == "create"
+            ? { opacity: 1, zIndex: 1 }
+            : { opacity: 0, zIndex: -1 }
+        }
       >
         <label className={styles.titleLabel}>
           Class Name <span>*</span>
@@ -149,7 +165,11 @@ export default function Rooms() {
       </div>
       <div
         className={styles.joinRoomContainer}
-        style={displayOption == "join" ? { opacity: 1 } : { opacity: 0 }}
+        style={
+          displayOption == "join"
+            ? { opacity: 1, zIndex: 1 }
+            : { opacity: 0, zIndex: -1 }
+        }
       >
         <label className={styles.roomCodeLabel}>
           Class Name <span>*</span>
@@ -196,7 +216,24 @@ export default function Rooms() {
             }}
           >
             <p>{room.title}</p>
-            <p>{room.firstName + " " + room.lastName}</p>
+            <div className={styles.roomRightContainer}>
+              <p>{room.firstName + " " + room.lastName}</p>
+              {room.adminId == userId ? (
+                <TrashIcon
+                  className={styles.trashIcon}
+                  color="red"
+                  width="20"
+                  height="20"
+                ></TrashIcon>
+              ) : (
+                <ArrowLeftStartOnRectangleIcon
+                  className={styles.trashIcon}
+                  color="red"
+                  width="20"
+                  height="20"
+                ></ArrowLeftStartOnRectangleIcon>
+              )}
+            </div>
           </div>
         );
       })}
