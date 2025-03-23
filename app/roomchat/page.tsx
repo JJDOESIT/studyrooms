@@ -1,11 +1,11 @@
 "use client";
 
-import { useSearchParams } from 'next/navigation'
-import { useEffect, useRef, useState } from 'react';
-import styles from './roomchat.module.css'
-import { stringToColor } from '../functions/colors';
-import { getMessages, Message, sendMessage } from '../functions/messages';
-import { getUserId } from '../functions/session';
+import { useSearchParams } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
+import styles from "./roomchat.module.css";
+import { stringToColor } from "../functions/colors";
+import { getMessages, Message, sendMessage } from "../functions/messages";
+import { getUserId } from "../functions/session";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function Roomchat() {
@@ -23,13 +23,12 @@ export default function Roomchat() {
   // Ref to the messages container for scrolling
   const containerRef = useRef<HTMLDivElement | null>(null);
 
-//   // Scroll to the bottom whenever a new message appears
-//   useEffect(() => {
-//     if (containerRef.current) {
-//       containerRef.current.scrollTop = containerRef.current.scrollHeight;
-//     }
-//   }, [messages]);
-
+  //   // Scroll to the bottom whenever a new message appears
+  //   useEffect(() => {
+  //     if (containerRef.current) {
+  //       containerRef.current.scrollTop = containerRef.current.scrollHeight;
+  //     }
+  //   }, [messages]);
 
   // query user id on page load
   useEffect(() => {
@@ -52,15 +51,15 @@ export default function Roomchat() {
 
   useEffect(() => {
     if (messages.length > prevLength.current) {
-        if (containerRef.current) {
-            containerRef.current.scrollTo({
-                top: containerRef.current.scrollHeight,
-                behavior: "smooth",
-            });
-        }
+      if (containerRef.current) {
+        containerRef.current.scrollTo({
+          top: containerRef.current.scrollHeight,
+          behavior: "smooth",
+        });
       }
-      prevLength.current = messages.length;
-    }, [messages]);
+    }
+    prevLength.current = messages.length;
+  }, [messages]);
 
   const handleKeyDown = (event: any) => {
     if (event.key === "Enter") {
@@ -77,56 +76,65 @@ export default function Roomchat() {
     }
   };
 
-    return (
-        <div className='w-full h-full animate__animated animate__fadeIn animate__slow'>
-            <div className='w-full h-[5%] text-2xl font-bold'>
-                {roomName}
-            </div>
-            <div ref={containerRef} className={`flex flex-col space-y-4 overflow-auto h-[85%] mr-[5px] ${styles.scrollbarthin}`}>
-                <div className='h-[30px]'></div>
-                <AnimatePresence>
-                {messages.map((msg, index) => (
-                    <motion.li
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.3, delay: 0.2}} 
-                    key={index} 
-                    className={`flex items-start mx-4 ${msg.id === userId ? 'justify-end' : ''}`}
-                    >
-                    {
-                        <div 
-                            className={`text-black px-2 py-1 rounded-xl max-w-xs break-words border-white border-[1px] bg-white`}
-                        >
-                            <p 
-                                className="font-bold rounded-xl py-1 px-3 w-fit"
-                                style={{ backgroundColor: stringToColor(msg.name), color: 'white' }}
-                            >{msg.name}</p>
-                            <p>{msg.content}</p>
-                        </div>
-                    }
-                    </motion.li>
-                ))}
-                </AnimatePresence>
-                <div className='h-[30px]'></div>
-            </div>
-            
-            <div className="flex space-x-2 bg-white h-[10%] flex items-center justify-center rounded-xl mx-[5px] p-3">
-                <input
-                type="text"
-                placeholder="Message"
-                value={contentInput}
-                onKeyDown={handleKeyDown}
-                onChange={(e) => setContentInput(e.target.value)}
-                className="border p-2 rounded-md flex-grow text-black"
-                />
-                <button
-                onClick={addMessage}
-                className="bg-blue-500 text-white p-2 rounded-md"
+  return (
+    <div className="relative w-full h-full animate__animated animate__fadeIn animate__slow">
+      <div className={styles.rosterSideBarContainer}>Hey</div>
+      <div className="w-full h-[5%] text-2xl font-bold">{roomName}</div>
+      <div
+        ref={containerRef}
+        className={`flex flex-col space-y-4 overflow-auto h-[85%] mr-[5px] ${styles.scrollbarthin}`}
+      >
+        <div className="h-[30px]"></div>
+        <AnimatePresence>
+          {messages.map((msg, index) => (
+            <motion.li
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3, delay: 0.2 }}
+              key={index}
+              className={`flex items-start mx-4 ${
+                msg.id === userId ? "justify-end" : ""
+              }`}
+            >
+              {
+                <div
+                  className={`text-black px-2 py-1 rounded-xl max-w-xs break-words border-white border-[1px] bg-white`}
                 >
-                Send
-                </button>
-            </div>
-        </div>
-    );
+                  <p
+                    className="px-3 py-1 font-bold rounded-xl w-fit"
+                    style={{
+                      backgroundColor: stringToColor(msg.name),
+                      color: "white",
+                    }}
+                  >
+                    {msg.name}
+                  </p>
+                  <p>{msg.content}</p>
+                </div>
+              }
+            </motion.li>
+          ))}
+        </AnimatePresence>
+        <div className="h-[30px]"></div>
+      </div>
+
+      <div className="flex space-x-2 bg-white h-[10%] flex items-center justify-center rounded-xl mx-[5px] p-3">
+        <input
+          type="text"
+          placeholder="Message"
+          value={contentInput}
+          onKeyDown={handleKeyDown}
+          onChange={(e) => setContentInput(e.target.value)}
+          className="flex-grow p-2 text-black border rounded-md"
+        />
+        <button
+          onClick={addMessage}
+          className="p-2 text-white bg-blue-500 rounded-md"
+        >
+          Send
+        </button>
+      </div>
+    </div>
+  );
 }
