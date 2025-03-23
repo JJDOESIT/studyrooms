@@ -21,9 +21,12 @@
     cursor: pointer;
 }
 
-.roomContainer > p:first-child{
-    font-weight: bold;
+.roomLeftContainer{
     margin-left: 5%;
+}
+
+.roomLeftContainer > p:first-child{
+    font-weight: bold;
 }
 
 .roomContainer p{

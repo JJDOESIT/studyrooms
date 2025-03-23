@@ -40,11 +40,10 @@ export default function Roomchat() {
     // load messages once every second
     useEffect(() => {
         const interval = setInterval(() => {
-          console.log("Running every second...", userId);
           if (userId) {
             getMessages(userId, roomId).then((data) => {setMessages(data)});
           }
-        }, 1000);
+        }, 100);
     
         return () => clearInterval(interval); // Cleanup on unmount
       }, [userId]);

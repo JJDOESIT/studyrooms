@@ -135,6 +135,30 @@ export default function Rooms() {
     }
   }
 
+  // Leave a room
+  async function leaveRoom(roomId: string) {
+    const response = await fetch(
+      process.env.NEXT_PUBLIC_BASE_URL + "api/py/leave-room",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ userId: userId, roomId: roomId }),
+      }
+    );
+    if (!response.ok) {
+      console.log(response.status);
+      return;
+    }
+
+    const data = await response.json();
+
+    if (data.status == 200) {
+      fetchAllRooms();
+    }
+  }
+
   // Set the user id and email on render
   useEffect(() => {
     getUserId();
@@ -276,12 +300,16 @@ export default function Rooms() {
               )} 3%)`,
             }}
           >
-            <p>{room.title}</p>
+            <div className={styles.roomLeftContainer}>
+              <p>{room.title}</p>
+              {userId == room.adminId && <p>{room.roomId}</p>}
+            </div>
             <div className={styles.roomRightContainer}>
               <p>{room.firstName + " " + room.lastName}</p>
               {room.adminId == userId ? (
                 <TrashIcon
-                  onClick={() => {
+                  onClick={(event) => {
+                    event.stopPropagation();
                     deleteRoom(room.roomId);
                   }}
                   className={styles.trashIcon}
@@ -291,6 +319,10 @@ export default function Rooms() {
                 ></TrashIcon>
               ) : (
                 <ArrowLeftStartOnRectangleIcon
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    leaveRoom(room.roomId);
+                  }}
                   className={styles.trashIcon}
                   color="red"
                   width="20"
