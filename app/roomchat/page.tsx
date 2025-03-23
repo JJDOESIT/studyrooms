@@ -7,7 +7,13 @@ import { stringToColor } from "../functions/colors";
 import { getMessages, Message, sendMessage } from "../functions/messages";
 import { getUserId } from "../functions/session";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeftCircleIcon } from "@heroicons/react/24/outline";
+import { approveMessage, deleteMessage } from "../functions/messages";
+import {
+  ArrowLeftCircleIcon,
+  CheckIcon,
+  PaperClipIcon,
+  XMarkIcon,
+} from "@heroicons/react/24/outline";
 
 export default function Roomchat() {
   // URL parameters
@@ -17,6 +23,7 @@ export default function Roomchat() {
 
   // State to track the input fields, message array, and current_user
   const [contentInput, setContentInput] = useState<string>("");
+  const [fileInput, setFileInput] = useState<string>("");
   const [messages, setMessages] = useState<Message[]>([]);
   const prevLength = useRef(messages.length);
   const [userId, setuserId] = useState<number>();
@@ -82,9 +89,16 @@ export default function Roomchat() {
 
   // Function to handle adding a new message
   const addMessage = () => {
-    if (contentInput && userId) {
-      sendMessage(userId, roomId, contentInput);
-      setContentInput("");
+    if (userId) {
+      if (contentInput) {
+        sendMessage(userId, roomId, contentInput, false);
+        setContentInput("");
+      }
+      if (fileInput) {
+        console.log(fileInput);
+        sendMessage(userId, roomId, fileInput, true);
+        setFileInput("");
+      }
     }
   };
 
@@ -117,6 +131,23 @@ export default function Roomchat() {
   useEffect(() => {
     fetchRoster(roomId);
   }, []);
+
+  // Handle image upload to base64
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+
+    reader.onloadend = () => {
+      if (reader.result && typeof reader.result === "string") {
+        // Convert image to base64 string and set it
+        console.log(reader.result);
+        setFileInput(reader.result);
+      }
+    };
+  };
 
   return (
     <div className="relative w-full h-full overflow-hidden animate__animated animate__fadeIn animate__slow">
@@ -200,7 +231,9 @@ export default function Roomchat() {
             >
               {
                 <div
-                  className={`text-black px-2 py-1 rounded-xl max-w-xs break-words border-white border-[1px] bg-white`}
+                  className={`text-black px-2 py-1 rounded-xl max-w-xs break-words border-white border-[1px] ${
+                    msg.flagged ? "bg-red-200" : "bg-white"
+                  }`}
                 >
                   <p
                     className="px-3 py-1 font-bold rounded-xl w-fit"
@@ -211,7 +244,29 @@ export default function Roomchat() {
                   >
                     {msg.name}
                   </p>
-                  <p>{msg.content}</p>
+                  {msg.image ? (
+                    <img src={msg.message}></img>
+                  ) : (
+                    <p>{msg.message}</p>
+                  )}
+                  {msg.flagged && userId && (
+                    <>
+                      <button
+                        onClick={() => deleteMessage(userId, msg.messageId)}
+                        className="px-3 py-2 text-white transition bg-red-400 rounded-lg hover:bg-red-500"
+                      >
+                        <XMarkIcon className="inline w-6 h-6" />
+                      </button>
+                      {roster && roster[0] && roster[0].userId == userId && (
+                        <button
+                          onClick={() => approveMessage(userId, msg.messageId)}
+                          className="px-3 py-2 text-white transition bg-green-400 rounded-lg hover:bg-green-500"
+                        >
+                          <CheckIcon className="inline w-6 h-6" />
+                        </button>
+                      )}
+                    </>
+                  )}
                 </div>
               }
             </motion.li>
@@ -220,7 +275,17 @@ export default function Roomchat() {
         <div className="h-[30px]"></div>
       </div>
 
-      <div className="flex space-x-2 bg-white h-[10%] flex items-center justify-center rounded-xl mx-[5px] p-3 ml-[24px] mr-[33px]">
+      <div className="flex items-center space-x-2 bg-white h-[10%] justify-center rounded-xl mx-[5px] p-3 ml-[24px] mr-[33px]">
+        <label className="p-2 text-gray-700 bg-gray-200 rounded-md cursor-pointer hover:bg-gray-300">
+          <PaperClipIcon width="20" height="20"></PaperClipIcon>
+          <input
+            onChange={(event) => {
+              handleImageUpload(event);
+            }}
+            type="file"
+            className="hidden"
+          />
+        </label>
         <input
           type="text"
           placeholder="Message"
@@ -231,7 +296,7 @@ export default function Roomchat() {
         />
         <button
           onClick={addMessage}
-          className="p-2 text-white bg-blue-500 rounded-md"
+          className="p-2 text-white bg-blue-500 rounded-md hover:bg-blue-600"
         >
           Send
         </button>

@@ -38,7 +38,8 @@ model Message {
     messageId Int @id @default(autoincrement())
     userId Int
     roomId String
-    message String
+    message String?
     date DateTime
     flagged Boolean
+    image Boolean
 }
