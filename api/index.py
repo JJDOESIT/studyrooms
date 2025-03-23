@@ -104,6 +104,10 @@ class SendMessage(BaseModel):
     roomId: str
     content: str
 
+class DeleteMessage(BaseModel):
+    messageId: int
+    userId: int
+
 
 @app.post("/api/py/create-user")
 async def create_user(user: CreateUser):
@@ -388,16 +392,18 @@ async def fetch_messages(info: FetchMessages):
         messages = await prisma.query_raw(
             """
             SELECT 
+                m."messageId" AS "messageId",
                 u."userId" AS "id", 
                 u."firstName" || ' ' || u."lastName" AS "name", 
-                m."message" AS "content"
+                m."message" AS "content",
+                m."flagged" as "flagged"
             FROM "Message" m
             JOIN "User" u ON m."userId" = u."userId"
             JOIN "Membership" mshp ON mshp."userId" = u."userId"
-            WHERE mshp."roomId" = $1 AND m."flagged" = FALSE AND m."roomId" = $1
+            WHERE mshp."roomId" = $1 AND (m."flagged" = FALSE or m."userId" = $2) AND m."roomId" = $1
             ORDER BY m."date" ASC
             """,
-            info.roomId,
+            info.roomId, info.userId
         )
 
         return {"status": 200, "messages": messages}
@@ -439,4 +445,24 @@ async def fetch_messages(data: SendMessage):
     except Exception as error:
         print(error)
         # Return 400
+        return {"status": 400, "error": str(error)}
+
+
+@app.post("/api/py/delete-message")
+async def delete_message(data: DeleteMessage):
+    try:
+        # Delete the message if it belongs to the user
+        deleted_message = await prisma.execute_raw(
+            'DELETE FROM "Message" WHERE "messageId" = $1 AND "userId" = $2 RETURNING *',
+            data.messageId,
+            data.userId,
+        )
+
+        if deleted_message:
+            return {"status": 200, "message": "Message deleted successfully"}
+        else:
+            return {"status": 404, "error": "Message not found or unauthorized"}
+
+    except Exception as error:
+        print(error)
         return {"status": 400, "error": str(error)}

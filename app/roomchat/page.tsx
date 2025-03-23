@@ -4,10 +4,10 @@ import { useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import styles from "./roomchat.module.css";
 import { stringToColor } from "../functions/colors";
-import { getMessages, Message, sendMessage } from "../functions/messages";
+import { deleteMessage, getMessages, Message, sendMessage } from "../functions/messages";
 import { getUserId } from "../functions/session";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeftCircleIcon, ArrowLeftIcon, ArrowUturnLeftIcon } from '@heroicons/react/24/outline';
+import { ArrowLeftCircleIcon, ArrowLeftIcon, ArrowUturnLeftIcon, CheckBadgeIcon, CheckIcon, XMarkIcon } from '@heroicons/react/24/outline';
 
 export default function Roomchat() {
   // URL parameters
@@ -97,13 +97,30 @@ export default function Roomchat() {
                     >
                     {
                         <div 
-                            className={`text-black px-2 py-1 rounded-xl max-w-xs break-words border-white border-[1px] bg-white`}
+                            className={`text-black px-2 py-1 rounded-xl max-w-xs break-words border-white border-[1px] ${msg.flagged ? "bg-red-200" : "bg-white"}`}
                         >
                             <p 
                                 className="font-bold rounded-xl py-1 px-3 w-fit"
                                 style={{ backgroundColor: stringToColor(msg.name), color: 'white' }}
                             >{msg.name}</p>
                             <p>{msg.content}</p>
+                            {msg.flagged && userId &&  (
+                              <><button 
+                                  onClick={() => deleteMessage(userId, msg.messageId)}
+                                  className="rounded-lg bg-red-400 hover:bg-red-500 text-white transition py-2 px-3"
+                              >
+                                <XMarkIcon className="w-6 h-6 inline" />
+                              </button>
+                              { true &&
+                                <button 
+                                onClick={() => deleteMessage(userId, msg.messageId)}
+                                className="rounded-lg bg-green-400 hover:bg-green-500 text-white transition py-2 px-3"
+                                >
+                                  <CheckIcon className="w-6 h-6 inline" />
+                                </button>
+                              }
+                              </>
+                            )}
                         </div>
                     }
                     </motion.li>
