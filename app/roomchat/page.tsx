@@ -26,6 +26,7 @@ export default function Roomchat() {
 
   // Roster
   const [roster, setRoster] = useState<Array<{
+    userId: number;
     firstName: string;
     lastName: string;
     admin: Boolean;
@@ -107,6 +108,7 @@ export default function Roomchat() {
     const data = await response.json();
 
     if (data.status == 200) {
+      console.log(data.data);
       setRoster(data.data);
     }
   }
