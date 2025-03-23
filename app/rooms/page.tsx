@@ -86,6 +86,35 @@ export default function Rooms() {
     }
   }
 
+  // Fetch roster
+  async function fetchRoster(roomId: string) {
+    const response = await fetch(
+      process.env.NEXT_PUBLIC_BASE_URL + "api/py/fetch-roster",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ roomId: roomId }),
+      }
+    );
+    if (!response.ok) {
+      console.log(response.status);
+      return;
+    }
+
+    const data = await response.json();
+
+    if (data.status == 200) {
+      console.log(data.data);
+    }
+  }
+
+  // Fetch roster
+  useEffect(() => {
+    fetchRoster("3ce08a");
+  }, []);
+
   // Delete room
   async function deleteRoom(roomId: string) {
     const response = await fetch(
@@ -172,7 +201,9 @@ export default function Rooms() {
   }, [userEmail]);
 
   return (
-    <div className={`${styles.pageContainer} animate__animated animate__fadeIn animate__slow`}>
+    <div
+      className={`${styles.pageContainer} animate__animated animate__fadeIn animate__slow`}
+    >
       <div className={styles.initialButtonContainer}>
         <div>
           <Button

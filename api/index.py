@@ -7,7 +7,6 @@ import hashlib
 import time
 import openai
 from dotenv import load_dotenv
-import os
 
 
 load_dotenv()  # Load environment variables from .env
@@ -15,10 +14,7 @@ client = openai.OpenAI(api_key=os.getenv("OPENAI_KEY"))  # Ensure you have an AP
     
 
 def is_safe_for_work(message, threshold=0.01):  # Set sensitivity level
-    response = client.moderations.create(
-        input=message,
-        model="omni-moderation-latest"
-    )
+    response = client.moderations.create(input=message, model="omni-moderation-latest")
 
     results = response.results[0]  # Get first moderation result
     scores = results.category_scores  # Object containing category scores
@@ -74,6 +70,10 @@ class FetchAllRooms(BaseModel):
 
 
 class DeleteRoom(BaseModel):
+    roomId: str
+
+
+class FetchRoster(BaseModel):
     roomId: str
 
 
@@ -268,6 +268,28 @@ async def delete_room(user: DeleteRoom):
         return {"status": 400}
 
 
+@app.post("/api/py/fetch-roster")
+async def fetch_roster(user: FetchRoster):
+    try:
+        results = await prisma.query_raw(
+            'SELECT "User"."firstName", "User"."lastName", "Membership"."admin" FROM "User" '
+            'JOIN "Membership" ON "Membership"."userId" = "User"."userId" '
+            'WHERE "Membership"."roomId" = $1 '
+            'ORDER BY "Membership"."admin" DESC',
+            user.roomId,
+        )
+
+        # No results found
+        if not results:
+            return {"status": 404}
+
+        return {"status": 200, "data": results}
+    except Exception as error:
+        print(error)
+        # Return 400
+        return {"status": 400}
+
+
 @app.post("/api/py/join-room")
 async def join_room(user: JoinRoom):
     try:
@@ -366,8 +388,8 @@ async def fetch_messages(data: SendMessage):
         if len(membership) == 0:
             # Return 404 if not in that room
             return {"status": 401, "error": "Not a member of that room!"}
-        
-        sfw  = is_safe_for_work(data.content)
+
+        sfw = is_safe_for_work(data.content)
 
         print(data.content)
 
