@@ -94,35 +94,6 @@ export default function Rooms() {
     }
   }
 
-  // Fetch roster
-  async function fetchRoster(roomId: string) {
-    const response = await fetch(
-      process.env.NEXT_PUBLIC_BASE_URL + "api/py/fetch-roster",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ roomId: roomId }),
-      }
-    );
-    if (!response.ok) {
-      console.log(response.status);
-      return;
-    }
-
-    const data = await response.json();
-
-    if (data.status == 200) {
-      console.log(data.data);
-    }
-  }
-
-  // Fetch roster
-  useEffect(() => {
-    fetchRoster("3ce08a");
-  }, []);
-
   // Delete room
   async function deleteRoom(roomId: string) {
     const response = await fetch(
@@ -356,57 +327,58 @@ export default function Rooms() {
         )}
       </div>
       <AnimatePresence>
-      {rooms?.map((room, index) => {
-        return (
-          <motion.li
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.3, delay: 0.1 * index}} 
-          key={index} 
-          className={styles.roomContainer}
-          style={{
-            background: `linear-gradient(-90deg, rgb(255, 255, 255) 97%, ${hashToRGB(
-              room.roomId
-            )} 3%)`,
-          }}
-          onClick={() => {
-            window.location.href = "/roomchat?room=" + room.roomId + "&roomname=" + room.title;
-          }}
-          > 
-            <div className={styles.roomLeftContainer}>
-              <p>{room.title}</p>
-              {userId == room.adminId && <p>{room.roomId}</p>}
-            </div>
-            <div className={styles.roomRightContainer}>
-              <p>{room.firstName + " " + room.lastName}</p>
-              {room.adminId == userId ? (
-                <TrashIcon
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    deleteRoom(room.roomId);
-                  }}
-                  className={styles.trashIcon}
-                  color="red"
-                  width="20"
-                  height="20"
-                ></TrashIcon>
-              ) : (
-                <ArrowLeftStartOnRectangleIcon
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    leaveRoom(room.roomId);
-                  }}
-                  className={styles.trashIcon}
-                  color="red"
-                  width="20"
-                  height="20"
-                ></ArrowLeftStartOnRectangleIcon>
-              )}
-            </div>
-          </motion.li>
-        );
-      })}
+        {rooms?.map((room, index) => {
+          return (
+            <motion.li
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3, delay: 0.1 * index }}
+              key={index}
+              className={styles.roomContainer}
+              style={{
+                background: `linear-gradient(-90deg, rgb(255, 255, 255) 97%, ${hashToRGB(
+                  room.roomId
+                )} 3%)`,
+              }}
+              onClick={() => {
+                window.location.href =
+                  "/roomchat?room=" + room.roomId + "&roomname=" + room.title;
+              }}
+            >
+              <div className={styles.roomLeftContainer}>
+                <p>{room.title}</p>
+                {userId == room.adminId && <p>{room.roomId}</p>}
+              </div>
+              <div className={styles.roomRightContainer}>
+                <p>{room.firstName + " " + room.lastName}</p>
+                {room.adminId == userId ? (
+                  <TrashIcon
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      deleteRoom(room.roomId);
+                    }}
+                    className={styles.trashIcon}
+                    color="red"
+                    width="20"
+                    height="20"
+                  ></TrashIcon>
+                ) : (
+                  <ArrowLeftStartOnRectangleIcon
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      leaveRoom(room.roomId);
+                    }}
+                    className={styles.trashIcon}
+                    color="red"
+                    width="20"
+                    height="20"
+                  ></ArrowLeftStartOnRectangleIcon>
+                )}
+              </div>
+            </motion.li>
+          );
+        })}
       </AnimatePresence>
     </div>
   );
