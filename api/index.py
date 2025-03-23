@@ -352,7 +352,7 @@ async def leave_room(user: LeaveRoom):
         )
         await prisma.query_first(
             'DELETE FROM "Message" WHERE "userId" = $1 AND "roomId" = $2',
-            user.roomId,
+            user.userId,
             user.roomId,
         )
         return {"status": 200}

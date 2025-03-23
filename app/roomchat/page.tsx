@@ -313,7 +313,11 @@ export default function Roomchat() {
 
       <div className="flex items-center space-x-2 bg-white h-[10%] justify-center rounded-xl mx-[5px] p-3 ml-[24px] mr-[33px]">
         <label className="p-2 text-gray-700 bg-gray-200 rounded-md cursor-pointer hover:bg-gray-300">
-          <PaperClipIcon width="20" height="20"></PaperClipIcon>
+          {fileInput ? (
+            <img src={fileInput} className="w-[25px] h-[25px]"></img>
+          ) : (
+            <PaperClipIcon width="25" height="25"></PaperClipIcon>
+          )}
           <input
             onChange={(event) => {
               handleImageUpload(event);
