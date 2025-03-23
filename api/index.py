@@ -269,8 +269,6 @@ async def fetch_messages(info: FetchMessages):
             info.roomId,
         )
 
-        print(messages)
-
         return {"status": 200, "messages": messages}
 
     except Exception as error:
