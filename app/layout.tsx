@@ -24,7 +24,6 @@ export default function RootLayout({
         <HomeBg>
           <Snow></Snow>
           <Navbar />
-
           <div className="w-full h-[90vh] z-50">{children}</div>
         </HomeBg>
       </body>
