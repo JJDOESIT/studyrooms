@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from fastapi import FastAPI
 from prisma import Prisma
 from pydantic import BaseModel
@@ -42,6 +43,17 @@ class CreateRoom(BaseModel):
 class FetchAllRooms(BaseModel):
     email: str
 
+class FetchMessages(BaseModel):
+    userId: int
+    roomId: str
+
+class FetchId(BaseModel):
+    userEmail: str
+
+class SendMessage(BaseModel):
+    userId: int
+    roomId: str
+    content: str
 
 @app.post("/api/py/create-user")
 async def create_user(user: CreateUser):
@@ -184,6 +196,85 @@ async def fetch_all_rooms(user: FetchAllRooms):
         return {"status": 400}
 
 
-@app.get("/api/py/new-route")
-async def new_route():
-    return {"message": "This is a new route!"}
+@app.post("/api/py/fetch-id")
+async def fetch_id(email: FetchId):
+    # info: FetchMessages
+    try:
+        id_record = await prisma.query_raw(
+            'SELECT "userId" FROM "User" WHERE "email" = $1', email.userEmail
+        )
+        if id_record == None:
+            return {"status": 400, "error" : "No such user has that email"}
+        
+        user_id = id_record[0]["userId"]
+
+        return {"status": 200, "id": user_id}
+    
+    except Exception as error:
+        print(error)
+        # Return 400
+        return {"status": 400, "error" : str(error)}
+
+
+@app.post("/api/py/fetch-messages")
+async def fetch_messages(info: FetchMessages):
+    try:
+        membership = await prisma.query_raw(
+            'SELECT * FROM "Membership" WHERE "userId" = $1 AND "roomId" = $2', info.userId, info.roomId
+        )
+
+        if len(membership) == 0:
+            # Return 404 if not in that room
+            return {"status": 401, "error" : "Not a member of that room!"}
+
+        messages = await prisma.query_raw(
+            '''
+            SELECT 
+                u."userId" AS "id", 
+                u."firstName" || ' ' || u."lastName" AS "name", 
+                m."message" AS "content"
+            FROM "Message" m
+            JOIN "User" u ON m."userId" = u."userId"
+            JOIN "Membership" mshp ON mshp."userId" = u."userId"
+            WHERE mshp."roomId" = $1
+            ORDER BY m."date" ASC
+            ''', info.roomId
+        )
+
+        print(messages)
+
+        return {"status": 200, "messages" : messages}
+    
+    except Exception as error:
+        print(error)
+        # Return 400
+        return {"status": 400, "error" : str(error)}
+    
+@app.post("/api/py/send-message")
+async def fetch_messages(data: SendMessage):
+    try:
+        membership = await prisma.query_raw(
+            'SELECT * FROM "Membership" WHERE "userId" = $1 AND "roomId" = $2', data.userId, data.roomId
+        )
+
+        if len(membership) == 0:
+            # Return 404 if not in that room
+            return {"status": 401, "error" : "Not a member of that room!"}
+
+        encoded_message = data.content.encode("utf-8")
+
+        message = await prisma.message.create(
+            data={
+                "userId": data.userId,
+                "roomId": data.roomId,
+                "message": encoded_message,  # Store as Bytes
+                "date": datetime.now(timezone.utc),
+                "flagged": False,
+            }
+        )
+        return {"status": 200, "messageId": message.messageId}
+    
+    except Exception as error:
+        print(error)
+        # Return 400
+        return {"status": 400, "error" : str(error)}
