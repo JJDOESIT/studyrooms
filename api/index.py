@@ -6,6 +6,7 @@ from contextlib import asynccontextmanager
 import hashlib
 import time
 import openai
+import os
 from dotenv import load_dotenv
 
 
