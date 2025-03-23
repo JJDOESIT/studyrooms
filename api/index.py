@@ -222,7 +222,6 @@ async def fetch_id(email: FetchId):
 
 @app.post("/api/py/fetch-messages")
 async def fetch_messages(info: FetchMessages):
-    print(info.userId, info.roomId)
     try:
         membership = await prisma.query_raw(
             'SELECT * FROM "Membership" WHERE "userId" = $1 AND "roomId" = $2',
@@ -248,8 +247,6 @@ async def fetch_messages(info: FetchMessages):
             """,
             info.roomId,
         )
-
-        print(messages)
 
         return {"status": 200, "messages": messages}
 
