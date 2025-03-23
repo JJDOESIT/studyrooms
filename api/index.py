@@ -5,6 +5,41 @@ from pydantic import BaseModel
 from contextlib import asynccontextmanager
 import hashlib
 import time
+import openai
+from dotenv import load_dotenv
+import os
+
+
+load_dotenv()  # Load environment variables from .env
+client = openai.OpenAI(api_key=os.getenv("OPENAI_KEY"))  # Ensure you have an API client instance
+    
+
+def is_safe_for_work(message, threshold=0.01):  # Set sensitivity level
+    response = client.moderations.create(
+        input=message,
+        model="omni-moderation-latest"
+    )
+
+    results = response.results[0]  # Get first moderation result
+    categories = results.categories  # Object containing category flags
+    scores = results.category_scores  # Object containing category scores
+
+    # Convert categories and scores to dictionaries
+    category_flags = vars(categories)
+    category_scores = vars(scores)
+
+    print(category_scores)
+
+    f = True
+
+    # Detect any flagged category OR any category score exceeding the threshold
+    for entry in category_scores:
+        if category_scores[entry] > threshold:
+            f = False
+
+    print(category_scores)
+
+    return f  # Safe message
 
 
 ### Create FastAPI instance with custom docs and openapi url
@@ -311,7 +346,7 @@ async def fetch_messages(info: FetchMessages):
             FROM "Message" m
             JOIN "User" u ON m."userId" = u."userId"
             JOIN "Membership" mshp ON mshp."userId" = u."userId"
-            WHERE mshp."roomId" = $1
+            WHERE mshp."roomId" = $1 AND m."flagged" = FALSE
             ORDER BY m."date" ASC
             """,
             info.roomId,
@@ -337,6 +372,8 @@ async def fetch_messages(data: SendMessage):
         if len(membership) == 0:
             # Return 404 if not in that room
             return {"status": 401, "error": "Not a member of that room!"}
+        
+        sfw  = is_safe_for_work(data.content)
 
         message = await prisma.message.create(
             data={
@@ -344,7 +381,7 @@ async def fetch_messages(data: SendMessage):
                 "roomId": data.roomId,
                 "message": data.content,  # Store as Bytes
                 "date": datetime.now(timezone.utc),
-                "flagged": False,
+                "flagged": not sfw,
             }
         )
         return {"status": 200, "messageId": message.messageId}

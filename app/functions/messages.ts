@@ -5,7 +5,6 @@ export type Message = {
 };
 
 export async function getMessages(userId : number, roomId: string): Promise<Message[]> {
-        console.log(userId, roomId);
         // API call wrapper to get all of the data for messages given user and room
         const response = await fetch(
             process.env.NEXT_PUBLIC_BASE_URL + "api/py/fetch-messages",
@@ -19,13 +18,12 @@ export async function getMessages(userId : number, roomId: string): Promise<Mess
           );
 
         const data = await response.json();
-        console.log(data.messages);
         return data.messages
     }
 
 
 export async function sendMessage(userId : number, roomId: string, content: string){
-  console.log(userId, roomId);
+  console.log(userId, roomId, content);
   // API call wrapper to send messages
   const response = await fetch(
       process.env.NEXT_PUBLIC_BASE_URL + "api/py/send-message",
