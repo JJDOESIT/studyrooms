@@ -311,6 +311,19 @@ async def join_room(user: JoinRoom):
             # Return 401
             return {"status": 401}
 
+        # Make sure user is not already a member
+        inRoom = await prisma.query_raw(
+            'SELECT * FROM "Membership" WHERE "roomId" = $1 AND "userId" = $2',
+            user.roomId,
+            user.userId,
+        )
+
+        # User already in room
+        if inRoom:
+            # Return 402
+            return {"status": 402}
+
+        # Create membership
         await prisma.query_raw(
             'INSERT INTO "Membership" ("userId", "roomId", "admin") VALUES ($1, $2, FALSE)',
             user.userId,

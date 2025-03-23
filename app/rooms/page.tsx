@@ -172,6 +172,9 @@ export default function Rooms() {
     } else if (data.status == 401) {
       setAlertMessage("Invalid room code!");
       setAlertType("error");
+    } else if (data.status == 402) {
+      setAlertMessage("Already in room!");
+      setAlertType("error");
     } else {
       setAlertMessage("Server error!");
       setAlertType("error");
