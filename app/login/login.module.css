@@ -14,7 +14,7 @@
     width: 80%;
     height: fit-content;
     background-color: white;
-    padding: 20px 25px;
+    padding: 60px 35px 50px 35px;
     border-radius: 45px;
     max-width: 500px;
     box-shadow: 0px 4px 6px -1px rgba(0, 0, 0, 0.1);
@@ -31,19 +31,19 @@
 .emailInput, .passwordInput{
     padding: 10px;
     margin-bottom: 10px;
-    border: 1px solid #050505; /* Black border, adjust as per your theme */
+    border: 1px solid #050505;
     border-radius: 6px;
-    transition: all 0.3s ease; /* Smooth transition for hover and focus */
+    transition: all 0.3s ease;
 }
 
 .emailInput:focus, .passwordInput:focus {
-    outline: none; /* Remove default outline */
-    border-color: #00a5cf; /* Pacific Cyan border color on focus */
-    box-shadow: 0 0 0 2px rgba(0, 165, 207, 0.5); /* Optional glow effect */
+    outline: none;
+    border-color: #00a5cf;
+    box-shadow: 0 0 0 2px rgba(0, 165, 207, 0.5); 
 }
 
 .emailInput:hover, .passwordInput:hover{
-    border-color: #00a5cf; /* Change border color on hover */
+    border-color: #00a5cf;
 }
 
 

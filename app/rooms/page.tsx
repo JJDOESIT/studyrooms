@@ -8,12 +8,14 @@ import Button from "@/components/Button";
 
 export default function Rooms() {
   const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [userId, setUserId] = useState<number | null>(null);
   const [title, setTitle] = useState("");
   const [roomCode, setRoomCode] = useState("");
   const [displayOption, setDisplayOption] = useState("");
   const [rooms, setRooms] = useState<null | Array<{
     roomId: string;
     title: string;
+    adminId: number;
     firstName: string;
     lastName: string;
   }>>(null);
@@ -68,17 +70,23 @@ export default function Rooms() {
     }
   }
 
+  // Set the user id and email
   async function getUserId() {
     const session = await getSession();
-    if (session && session.email) {
+    if (session && session.email && session.id) {
       setUserEmail(session.email as string);
+      setUserId(session.id as number);
+    } else {
+      window.location.href = "/login";
     }
   }
 
+  // Set the user id and email on render
   useEffect(() => {
     getUserId();
   }, []);
 
+  // Fetch all rooms once the user is authenticated
   useEffect(() => {
     if (userEmail) {
       fetchAllRooms();

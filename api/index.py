@@ -172,7 +172,7 @@ async def fetch_all_rooms(user: FetchAllRooms):
 
         # Fetch all rooms
         rooms = await prisma.query_raw(
-            'SELECT "Room"."title", "Room"."roomId", "User"."firstName", "User"."lastName" FROM "Room" JOIN "User" ON "Room"."adminId" = "User"."userId" WHERE "roomId" IN (SELECT "roomId" FROM "Membership" WHERE "userId" = $1)',
+            'SELECT "Room"."title", "Room"."roomId", "Room"."adminId", "User"."firstName", "User"."lastName", FROM "Room" JOIN "User" ON "Room"."adminId" = "User"."userId" WHERE "roomId" IN (SELECT "roomId" FROM "Membership" WHERE "userId" = $1)',
             userId,
         )
 
