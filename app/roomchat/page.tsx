@@ -26,7 +26,7 @@ export default function Roomchat() {
   const [contentInput, setContentInput] = useState<string>("");
   const [fileInput, setFileInput] = useState<string>("");
   const [messages, setMessages] = useState<Message[]>([]);
-  const prevLength = useRef(messages.length);
+  const prevLength = useRef(0);
   const [userId, setuserId] = useState<number>();
   const [rosterOpen, setRosterOpen] = useState(false);
   const sideBarRef = useRef<HTMLDivElement>(null);
@@ -62,7 +62,11 @@ export default function Roomchat() {
     const interval = setInterval(() => {
       if (userId) {
         getMessages(userId, roomId).then((data) => {
-          setMessages(data);
+          if (!data) {
+            window.location.href = "/rooms";
+          } else {
+            setMessages(data);
+          }
         });
       }
     }, 3000);
@@ -70,6 +74,10 @@ export default function Roomchat() {
   }, [userId]);
 
   useEffect(() => {
+    console.log(messages);
+    if (!messages) {
+      window.location.href = "/rooms";
+    }
     if (messages.length > prevLength.current) {
       if (containerRef.current) {
         containerRef.current.scrollTo({
