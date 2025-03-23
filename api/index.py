@@ -283,7 +283,7 @@ async def delete_room(user: DeleteRoom):
 async def fetch_roster(user: FetchRoster):
     try:
         results = await prisma.query_raw(
-            'SELECT "User"."firstName", "User"."lastName", "Membership"."admin" FROM "User" '
+            'SELECT "User"."userId", "User"."firstName", "User"."lastName", "Membership"."admin" FROM "User" '
             'JOIN "Membership" ON "Membership"."userId" = "User"."userId" '
             'WHERE "Membership"."roomId" = $1 '
             'ORDER BY "Membership"."admin" DESC',
