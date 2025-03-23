@@ -11,8 +11,10 @@ from dotenv import load_dotenv
 
 
 load_dotenv()  # Load environment variables from .env
-client = openai.OpenAI(api_key=os.getenv("OPENAI_KEY"))  # Ensure you have an API client instance
-    
+client = openai.OpenAI(
+    api_key=os.getenv("OPENAI_KEY")
+)  # Ensure you have an API client instance
+
 
 def is_safe_for_work(message, threshold=0.01):  # Set sensitivity level
     response = client.moderations.create(input=message, model="omni-moderation-latest")
@@ -185,6 +187,10 @@ async def create_room(user: CreateRoom):
         # Fetch the userId
         userId = userId["userId"]
 
+        # Title too short or too long
+        if len(user.title) < 1 or len(user.title) > 75:
+            return {"status": 401}
+
         # Create random hash value
         hash_object = hashlib.sha1()
         hash_object.update(str(time.time() + userId).encode("utf-8"))
@@ -294,11 +300,23 @@ async def fetch_roster(user: FetchRoster):
 @app.post("/api/py/join-room")
 async def join_room(user: JoinRoom):
     try:
+        # Validate room code
+        room = await prisma.query_raw(
+            'SELECT * FROM "Room" WHERE "roomId" = $1',
+            user.roomId,
+        )
+
+        # Room code does not exist
+        if not room:
+            # Return 401
+            return {"status": 401}
+
         await prisma.query_raw(
             'INSERT INTO "Membership" ("userId", "roomId", "admin") VALUES ($1, $2, FALSE)',
             user.userId,
             user.roomId,
         )
+        # Return 200
         return {"status": 200}
     except Exception as error:
         print(error)
