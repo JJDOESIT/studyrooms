@@ -6,7 +6,6 @@ import styles from './roomchat.module.css'
 import { stringToColor } from '../functions/colors';
 import { getMessages, Message, sendMessage } from '../functions/messages';
 import { getUserId } from '../functions/session';
-import { userAgent } from 'next/server';
 
 export default function Roomchat() {
     // URL parameters
@@ -22,29 +21,30 @@ export default function Roomchat() {
     // Ref to the messages container for scrolling
     const containerRef = useRef<HTMLDivElement | null>(null);
 
-    // Scroll to the bottom whenever a new message appears
-    useEffect(() => {
-        if (containerRef.current) {
-            containerRef.current.scrollTop = containerRef.current.scrollHeight;
-        }
-    }, [messages]);
-
-
     // query user id on page load
     useEffect(() => {
         getUserId().then((data : any) => {
             setuserId(data);
         })
+
+        if (containerRef.current) {
+            containerRef.current.scrollTop = containerRef.current.scrollHeight;
+       }
     }, []);
 
     // load messages once every second
     useEffect(() => {
         const interval = setInterval(() => {
-          console.log("Running every second...", userId);
           if (userId) {
-            getMessages(userId, roomId).then((data) => {setMessages(data)});
+            getMessages(userId, roomId).then((data) => {
+                if (data == undefined) {
+                    window.location.href = "/rooms";
+                } else {
+                    setMessages(data)
+                }
+            });
           }
-        }, 1000);
+        }, 100);
     
         return () => clearInterval(interval); // Cleanup on unmount
       }, [userId]);
