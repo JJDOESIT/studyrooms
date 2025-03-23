@@ -11,7 +11,7 @@ import os
 
 
 load_dotenv()  # Load environment variables from .env
-client = openai.OpenAI(api_key="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")  # Ensure you have an API client instance
+client = openai.OpenAI(api_key=os.getenv("OPENAI_KEY"))  # Ensure you have an API client instance
     
 
 def is_safe_for_work(message, threshold=0.01):  # Set sensitivity level
@@ -21,25 +21,19 @@ def is_safe_for_work(message, threshold=0.01):  # Set sensitivity level
     )
 
     results = response.results[0]  # Get first moderation result
-    categories = results.categories  # Object containing category flags
     scores = results.category_scores  # Object containing category scores
 
     # Convert categories and scores to dictionaries
-    category_flags = vars(categories)
     category_scores = vars(scores)
 
-    print(category_scores)
-
-    f = True
+    flagged = True
 
     # Detect any flagged category OR any category score exceeding the threshold
     for entry in category_scores:
         if category_scores[entry] > threshold:
-            f = False
+            flagged = False
 
-    print(category_scores)
-
-    return f  # Safe message
+    return flagged  # Safe message
 
 
 ### Create FastAPI instance with custom docs and openapi url
@@ -346,7 +340,7 @@ async def fetch_messages(info: FetchMessages):
             FROM "Message" m
             JOIN "User" u ON m."userId" = u."userId"
             JOIN "Membership" mshp ON mshp."userId" = u."userId"
-            WHERE mshp."roomId" = $1 AND m."flagged" = FALSE
+            WHERE mshp."roomId" = $1 AND m."flagged" = FALSE AND m."roomId" = $1
             ORDER BY m."date" ASC
             """,
             info.roomId,

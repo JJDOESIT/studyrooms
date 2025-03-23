@@ -6,7 +6,6 @@ import styles from './roomchat.module.css'
 import { stringToColor } from '../functions/colors';
 import { getMessages, Message, sendMessage } from '../functions/messages';
 import { getUserId } from '../functions/session';
-import { userAgent } from 'next/server';
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function Roomchat() {
@@ -18,17 +17,19 @@ export default function Roomchat() {
   // State to track the input fields, message array, and current_user
   const [contentInput, setContentInput] = useState<string>("");
   const [messages, setMessages] = useState<Message[]>([]);
+  const prevLength = useRef(messages.length);
   const [userId, setuserId] = useState<number>();
 
   // Ref to the messages container for scrolling
   const containerRef = useRef<HTMLDivElement | null>(null);
 
-  // Scroll to the bottom whenever a new message appears
-  useEffect(() => {
-    if (containerRef.current) {
-      containerRef.current.scrollTop = containerRef.current.scrollHeight;
-    }
-  }, [messages]);
+//   // Scroll to the bottom whenever a new message appears
+//   useEffect(() => {
+//     if (containerRef.current) {
+//       containerRef.current.scrollTop = containerRef.current.scrollHeight;
+//     }
+//   }, [messages]);
+
 
   // query user id on page load
   useEffect(() => {
@@ -46,9 +47,20 @@ export default function Roomchat() {
         });
       }
     }, 100);
-
     return () => clearInterval(interval); // Cleanup on unmount
   }, [userId]);
+
+  useEffect(() => {
+    if (messages.length > prevLength.current) {
+        if (containerRef.current) {
+            containerRef.current.scrollTo({
+                top: containerRef.current.scrollHeight,
+                behavior: "smooth",
+            });
+        }
+      }
+      prevLength.current = messages.length;
+    }, [messages]);
 
   // Function to handle adding a new message
   const addMessage = () => {
@@ -68,10 +80,10 @@ export default function Roomchat() {
                 <AnimatePresence>
                 {messages.map((msg, index) => (
                     <motion.li
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 10 }}
-                    transition={{ duration: 0.3 }}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.3, delay: 0.2}} 
                     key={index} 
                     className={`flex items-start mx-4 ${msg.id === userId ? 'justify-end' : ''}`}
                     >
