@@ -44,6 +44,15 @@ class FetchAllRooms(BaseModel):
     email: str
 
 
+class DeleteRoom(BaseModel):
+    roomId: str
+
+
+class JoinRoom(BaseModel):
+    userId: int
+    roomId: str
+
+
 class FetchMessages(BaseModel):
     userId: int
     roomId: str
@@ -188,12 +197,52 @@ async def fetch_all_rooms(user: FetchAllRooms):
 
         # Fetch all rooms
         rooms = await prisma.query_raw(
-            'SELECT "Room"."title", "Room"."roomId", "Room"."adminId", "User"."firstName", "User"."lastName" FROM "Room" JOIN "User" ON "Room"."adminId" = "User"."userId" WHERE "roomId" IN (SELECT "roomId" FROM "Membership" WHERE "userId" = $1)',
+            'SELECT "Room"."title", "Room"."roomId", "Room"."adminId", "User"."firstName", "User"."lastName" '
+            'FROM "Room" '
+            'JOIN "User" ON "Room"."adminId" = "User"."userId" '
+            'WHERE "roomId" IN (SELECT "roomId" FROM "Membership" WHERE "userId" = $1)',
             userId,
         )
 
         # Return 200
         return {"status": 200, "rooms": rooms}
+    except Exception as error:
+        print(error)
+        # Return 400
+        return {"status": 400}
+
+
+@app.post("/api/py/delete-room")
+async def delete_room(user: DeleteRoom):
+    try:
+        await prisma.query_first(
+            'DELETE FROM "Room" WHERE "roomId" = $1',
+            user.roomId,
+        )
+        await prisma.query_first(
+            'DELETE FROM "Membership" WHERE "roomId" = $1',
+            user.roomId,
+        )
+        await prisma.query_first(
+            'DELETE FROM "Message" WHERE "roomId" = $1',
+            user.roomId,
+        )
+        return {"status": 200}
+    except Exception as error:
+        print(error)
+        # Return 400
+        return {"status": 400}
+
+
+@app.post("/api/py/join-room")
+async def join_room(user: JoinRoom):
+    try:
+        await prisma.query_raw(
+            'INSERT INTO "Membership" ("userId", "roomId", "admin") VALUES ($1, $2, FALSE)',
+            user.userId,
+            user.roomId,
+        )
+        return {"status": 200}
     except Exception as error:
         print(error)
         # Return 400
@@ -268,8 +317,6 @@ async def fetch_messages(data: SendMessage):
         if len(membership) == 0:
             # Return 404 if not in that room
             return {"status": 401, "error": "Not a member of that room!"}
-
-        #encoded_message = data.content.encode("utf-8")
 
         message = await prisma.message.create(
             data={

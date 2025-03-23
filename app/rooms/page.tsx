@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { getSession } from "../functions/cookies";
 import styles from "./rooms.module.css";
 import hashToRGB from "../functions/hashToRgb";
@@ -9,6 +9,7 @@ import {
   TrashIcon,
   ArrowLeftStartOnRectangleIcon,
 } from "@heroicons/react/24/outline";
+import { join } from "path";
 
 export default function Rooms() {
   const [userEmail, setUserEmail] = useState<string | null>(null);
@@ -23,6 +24,8 @@ export default function Rooms() {
     firstName: string;
     lastName: string;
   }>>(null);
+  const joinInputRef = useRef<HTMLInputElement | null>(null);
+  const createRoomRef = useRef<HTMLInputElement | null>(null);
 
   // Create a room
   async function createRoom() {
@@ -50,7 +53,6 @@ export default function Rooms() {
 
   // Fetch all rooms
   async function fetchAllRooms() {
-    console.log(userEmail);
     const response = await fetch(
       process.env.NEXT_PUBLIC_BASE_URL + "api/py/fetch-all-rooms",
       {
@@ -69,7 +71,6 @@ export default function Rooms() {
     const data = await response.json();
 
     if (data.status == 200) {
-      console.log(data);
       setRooms(data.rooms);
     }
   }
@@ -82,6 +83,55 @@ export default function Rooms() {
       setUserId(session.id as number);
     } else {
       window.location.href = "/login";
+    }
+  }
+
+  // Delete room
+  async function deleteRoom(roomId: string) {
+    const response = await fetch(
+      process.env.NEXT_PUBLIC_BASE_URL + "api/py/delete-room",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ roomId: roomId }),
+      }
+    );
+    if (!response.ok) {
+      console.log(response.status);
+      return;
+    }
+
+    const data = await response.json();
+
+    if (data.status == 200) {
+      fetchAllRooms();
+    }
+  }
+
+  // Join a room
+  async function joinRoom() {
+    const response = await fetch(
+      process.env.NEXT_PUBLIC_BASE_URL + "api/py/join-room",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ userId: userId, roomId: roomCode }),
+      }
+    );
+    if (!response.ok) {
+      console.log(response.status);
+      return;
+    }
+
+    const data = await response.json();
+
+    if (data.status == 200) {
+      setDisplayOption("");
+      fetchAllRooms();
     }
   }
 
@@ -105,6 +155,9 @@ export default function Rooms() {
             onClick={() => {
               setTitle("");
               setDisplayOption("create");
+              if (createRoomRef && createRoomRef.current) {
+                createRoomRef.current.value = "";
+              }
             }}
           >
             Create Room
@@ -115,6 +168,9 @@ export default function Rooms() {
             onClick={() => {
               setRoomCode("");
               setDisplayOption("join");
+              if (joinInputRef && joinInputRef.current) {
+                joinInputRef.current.value = "";
+              }
             }}
           >
             Join Room
@@ -133,6 +189,7 @@ export default function Rooms() {
           Class Name <span>*</span>
         </label>
         <input
+          ref={createRoomRef}
           className={styles.titleInput}
           type="text"
           placeholder="CSIS 3710"
@@ -172,9 +229,10 @@ export default function Rooms() {
         }
       >
         <label className={styles.roomCodeLabel}>
-          Class Name <span>*</span>
+          Room Code <span>*</span>
         </label>
         <input
+          ref={joinInputRef}
           className={styles.roomCodeInput}
           type="text"
           placeholder="ABCDEF"
@@ -198,7 +256,7 @@ export default function Rooms() {
             hoverFromColor="from-white"
             hoverToColor="to-green-200"
             onClick={() => {
-              createRoom();
+              joinRoom();
             }}
           >
             Join
@@ -208,6 +266,9 @@ export default function Rooms() {
       {rooms?.map((room) => {
         return (
           <div
+            onClick={() => {
+              window.location.href = "/roomchat?room=" + room.roomId;
+            }}
             className={styles.roomContainer}
             style={{
               background: `linear-gradient(-90deg, rgb(255, 255, 255) 97%, ${hashToRGB(
@@ -220,6 +281,9 @@ export default function Rooms() {
               <p>{room.firstName + " " + room.lastName}</p>
               {room.adminId == userId ? (
                 <TrashIcon
+                  onClick={() => {
+                    deleteRoom(room.roomId);
+                  }}
                   className={styles.trashIcon}
                   color="red"
                   width="20"
