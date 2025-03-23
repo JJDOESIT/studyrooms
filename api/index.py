@@ -8,9 +8,6 @@ import time
 import openai
 import os
 from dotenv import load_dotenv
-import base64
-from PIL import Image
-import io
 
 load_dotenv()  # Load environment variables from .env
 client = openai.OpenAI(
@@ -351,6 +348,11 @@ async def leave_room(user: LeaveRoom):
         await prisma.query_raw(
             'DELETE FROM "Membership" WHERE "userId" = $1 AND "roomId" = $2',
             user.userId,
+            user.roomId,
+        )
+        await prisma.query_first(
+            'DELETE FROM "Message" WHERE "userId" = $1 AND "roomId" = $2',
+            user.roomId,
             user.roomId,
         )
         return {"status": 200}

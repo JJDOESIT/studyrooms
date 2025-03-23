@@ -1,5 +1,5 @@
 "use client";
- 
+
 import { useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import styles from "./roomchat.module.css";
@@ -13,14 +13,15 @@ import {
   CheckIcon,
   PaperClipIcon,
   XMarkIcon,
+  UserMinusIcon,
 } from "@heroicons/react/24/outline";
- 
+
 export default function Roomchat() {
   // URL parameters
   const searchParams = useSearchParams();
   const roomName = searchParams.get("roomname");
   const roomId = searchParams.get("room") as string;
- 
+
   // State to track the input fields, message array, and current_user
   const [contentInput, setContentInput] = useState<string>("");
   const [fileInput, setFileInput] = useState<string>("");
@@ -30,7 +31,7 @@ export default function Roomchat() {
   const [rosterOpen, setRosterOpen] = useState(false);
   const sideBarRef = useRef<HTMLDivElement>(null);
   const navBarRef = useRef<HTMLDivElement>(null);
- 
+
   // Roster
   const [roster, setRoster] = useState<Array<{
     userId: number;
@@ -38,24 +39,24 @@ export default function Roomchat() {
     lastName: string;
     admin: Boolean;
   }> | null>(null);
- 
+
   // Ref to the messages container for scrolling
   const containerRef = useRef<HTMLDivElement | null>(null);
- 
+
   //   // Scroll to the bottom whenever a new message appears
   //   useEffect(() => {
   //     if (containerRef.current) {
   //       containerRef.current.scrollTop = containerRef.current.scrollHeight;
   //     }
   //   }, [messages]);
- 
+
   // query user id on page load
   useEffect(() => {
     getUserId().then((data: any) => {
       setuserId(data);
     });
   }, []);
- 
+
   // load messages once every second
   useEffect(() => {
     const interval = setInterval(() => {
@@ -71,7 +72,7 @@ export default function Roomchat() {
     }, 3000);
     return () => clearInterval(interval); // Cleanup on unmount
   }, [userId]);
- 
+
   useEffect(() => {
     console.log(messages);
     if (!messages) {
@@ -87,14 +88,14 @@ export default function Roomchat() {
     }
     prevLength.current = messages.length;
   }, [messages]);
- 
+
   const handleKeyDown = (event: any) => {
     if (event.key === "Enter") {
       event.preventDefault(); // Prevent form submission (if inside a form)
       addMessage();
     }
   };
- 
+
   // Function to handle adding a new message
   const addMessage = () => {
     if (userId) {
@@ -108,7 +109,7 @@ export default function Roomchat() {
       }
     }
   };
- 
+
   // Fetch roster
   async function fetchRoster(roomId: string) {
     const response = await fetch(
@@ -125,36 +126,59 @@ export default function Roomchat() {
       console.log(response.status);
       return;
     }
- 
+
     const data = await response.json();
- 
+
     if (data.status == 200) {
       setRoster(data.data);
     }
   }
- 
+
   // Fetch roster
   useEffect(() => {
     fetchRoster(roomId);
   }, []);
- 
+
   // Handle image upload to base64
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
- 
+
     const reader = new FileReader();
     reader.readAsDataURL(file);
- 
+
     reader.onloadend = () => {
       if (reader.result && typeof reader.result === "string") {
         // Convert image to base64 string and set it
-        console.log(reader.result);
         setFileInput(reader.result);
       }
     };
   };
- 
+
+  // Leave a room
+  async function leaveRoom(userId: number) {
+    const response = await fetch(
+      process.env.NEXT_PUBLIC_BASE_URL + "api/py/leave-room",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ userId: userId, roomId: roomId }),
+      }
+    );
+    if (!response.ok) {
+      console.log(response.status);
+      return;
+    }
+
+    const data = await response.json();
+
+    if (data.status == 200) {
+      fetchRoster(roomId);
+    }
+  }
+
   return (
     <div className="relative w-full h-full overflow-hidden animate__animated animate__fadeIn animate__slow">
       <div
@@ -182,9 +206,23 @@ export default function Roomchat() {
           <div className={styles.studentContainer}>Student</div>
           {roster?.map((person) => {
             return (
-              <div>
+              <div className={styles.rosterStudent}>
                 {!person.admin && (
-                  <div>{person.firstName + " " + person.lastName}</div>
+                  <>
+                    {" "}
+                    <div>{person.firstName + " " + person.lastName}</div>
+                    {roster[0].userId == userId && (
+                      <UserMinusIcon
+                        className={styles.deletePerson}
+                        onClick={() => {
+                          leaveRoom(person.userId);
+                        }}
+                        width="15"
+                        height="15"
+                        color="white"
+                      ></UserMinusIcon>
+                    )}
+                  </>
                 )}
               </div>
             );
@@ -280,7 +318,7 @@ export default function Roomchat() {
         </AnimatePresence>
         <div className="h-[30px]"></div>
       </div>
- 
+
       <div className="flex items-center space-x-2 bg-white h-[10%] justify-center rounded-xl mx-[5px] p-3 ml-[24px] mr-[33px]">
         <label className="p-2 text-gray-700 bg-gray-200 rounded-md cursor-pointer hover:bg-gray-300">
           <PaperClipIcon width="20" height="20"></PaperClipIcon>
@@ -310,5 +348,3 @@ export default function Roomchat() {
     </div>
   );
 }
- 
- 

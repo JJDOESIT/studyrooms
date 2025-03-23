@@ -73,3 +73,13 @@
     transform: translateY(0);
   }
 
+  .rosterStudent{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+ .deletePerson:hover{
+  cursor: pointer;
+ }
+
