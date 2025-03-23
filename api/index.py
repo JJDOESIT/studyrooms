@@ -110,6 +110,10 @@ class DeleteMessage(BaseModel):
     userId: int
 
 
+class FetchTheme(BaseModel):
+    roomId: str
+
+
 @app.post("/api/py/create-user")
 async def create_user(user: CreateUser):
     try:
@@ -176,6 +180,26 @@ async def login_user(user: LoginUser):
         return {"status": 400}
 
 
+@app.post("/api/py/fetch-theme")
+async def fetch_theme(user: FetchTheme):
+    try:
+        # Fetch theme
+        theme = await prisma.query_first(
+            'SELECT "theme" FROM "Room" WHERE "roomId" = $1', user.roomId
+        )
+
+        # Theme wasn't found
+        if not theme:
+            # Return 404
+            return {"status": 404}
+        # Return 200
+        return {"status": 200, "theme": theme["theme"]}
+    except Exception as error:
+        print(error)
+        # Return 400
+        return {"status": 400}
+
+
 @app.post("/api/py/create-room")
 async def create_room(user: CreateRoom):
     try:
@@ -203,10 +227,11 @@ async def create_room(user: CreateRoom):
 
         # Create a room
         await prisma.query_raw(
-            'INSERT INTO "Room" ("roomId", "title", "adminId") VALUES ($1, $2, $3)',
+            'INSERT INTO "Room" ("roomId", "title", "adminId", "theme") VALUES ($1, $2, $3, $4)',
             roomId,
             user.title,
             userId,
+            "default",
         )
 
         # Create a membership

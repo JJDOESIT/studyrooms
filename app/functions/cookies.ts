@@ -55,7 +55,7 @@ export async function login(email: string) {
   console.log(id);
 
   //Create a signed session
-  const cookie = await cookieEncrypt({ email, cookieExpires, id});
+  const cookie = await cookieEncrypt({ email, cookieExpires, id });
   // Save the session in a cookie
   cookies().set("session", cookie, {
     expires: cookieExpires,
@@ -63,17 +63,17 @@ export async function login(email: string) {
   });
 }
 
-export async function getIdByEmail(email:string) {
-    const response = await fetch(
-      process.env.NEXT_PUBLIC_BASE_URL + "api/py/fetch-id",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ userEmail: email}),
-      }
-    );
+export async function getIdByEmail(email: string) {
+  const response = await fetch(
+    process.env.NEXT_PUBLIC_BASE_URL + "api/py/fetch-id",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ userEmail: email }),
+    }
+  );
 
   const data = await response.json();
   return data.id;
