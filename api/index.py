@@ -114,6 +114,11 @@ class FetchTheme(BaseModel):
     roomId: str
 
 
+class ChangeTheme(BaseModel):
+    roomId: str
+    theme: str
+
+
 @app.post("/api/py/create-user")
 async def create_user(user: CreateUser):
     try:
@@ -194,6 +199,22 @@ async def fetch_theme(user: FetchTheme):
             return {"status": 404}
         # Return 200
         return {"status": 200, "theme": theme["theme"]}
+    except Exception as error:
+        print(error)
+        # Return 400
+        return {"status": 400}
+
+
+@app.post("/api/py/change-theme")
+async def change_theme(user: ChangeTheme):
+    try:
+        # If theme exists, update it
+        await prisma.room.update(
+            where={"roomId": user.roomId},
+            data={"theme": user.theme},
+        )
+        # Return 200
+        return {"status": 200}
     except Exception as error:
         print(error)
         # Return 400

@@ -83,3 +83,12 @@
   cursor: pointer;
  }
 
+ .navbarRight{
+    display: flex;
+    align-items: center;
+ }
+
+ .navbarRight:nth-child(2){
+    margin-left: 10px;
+ }
+

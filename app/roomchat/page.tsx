@@ -8,6 +8,8 @@ import { getMessages, Message, sendMessage } from "../functions/messages";
 import { getUserId } from "../functions/session";
 import { motion, AnimatePresence } from "framer-motion";
 import { approveMessage, deleteMessage } from "../functions/messages";
+import { useContext } from "react";
+import { GlobalContext } from "../layout";
 import {
   ArrowLeftCircleIcon,
   CheckIcon,
@@ -31,7 +33,9 @@ export default function Roomchat() {
   const [rosterOpen, setRosterOpen] = useState(false);
   const sideBarRef = useRef<HTMLDivElement>(null);
   const navBarRef = useRef<HTMLDivElement>(null);
-  const [theme, setTheme] = useState<string | null>(null);
+  const globalContext = useContext<{
+    themeRef: React.RefObject<HTMLDivElement | null>;
+  }>(GlobalContext);
 
   // Roster
   const [roster, setRoster] = useState<Array<{
@@ -199,7 +203,62 @@ export default function Roomchat() {
     const data = await response.json();
 
     if (data.status == 200) {
-      setTheme(data.theme);
+      if (globalContext.themeRef.current) {
+        if (data.theme != "default") {
+          globalContext.themeRef.current.style.background = getThemeGradient(
+            data.theme
+          );
+        } else {
+          // Clear inline styles to ensure the class takes effect
+          globalContext.themeRef.current.style.background = "";
+
+          // Add the Tailwind class to reset to default background
+          globalContext.themeRef.current.classList.add(
+            "bg-gradient-to-b",
+            "from-blue-600",
+            "to-blue-400"
+          );
+        }
+      }
+    }
+  }
+
+  // Fetch theme
+  async function changeTheme(theme: string) {
+    const response = await fetch(
+      process.env.NEXT_PUBLIC_BASE_URL + "api/py/change-theme",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ roomId: roomId, theme: theme }),
+      }
+    );
+    if (!response.ok) {
+      console.log(response.status);
+      return;
+    }
+
+    const data = await response.json();
+
+    if (data.status == 200) {
+      if (globalContext.themeRef.current) {
+        if (theme != "default") {
+          globalContext.themeRef.current.style.background =
+            getThemeGradient(theme);
+        } else {
+          // Clear inline styles to ensure the class takes effect
+          globalContext.themeRef.current.style.background = "";
+
+          // Add the Tailwind class to reset to default background
+          globalContext.themeRef.current.classList.add(
+            "bg-gradient-to-b",
+            "from-blue-600",
+            "to-blue-400"
+          );
+        }
+      }
     }
   }
 
@@ -211,12 +270,10 @@ export default function Roomchat() {
   // Custom color theme
   const getThemeGradient = (theme: string): string => {
     const gradients: { [key: string]: [string, string] } = {
-      default: ["#2563eb", "#60a5fa"],
       halloween: ["#FF7518", "#5A189A"],
       christmas: ["#DC2626", "#16A34A"],
       easter: ["#FDE68A", "#A7F3D0"],
       summer: ["#FDE047", "#F97316"],
-      winter: ["#3B82F6", "#60A5FA"],
     };
 
     const [color1, color2] = gradients[theme.toLowerCase()] || [
@@ -224,190 +281,201 @@ export default function Roomchat() {
       "#9CA3AF",
     ];
 
-    return `background: linear-gradient(to bottom, white, ${color1}, ${color2})`;
+    return `linear-gradient(to top, white, ${color1}, ${color2})`;
   };
 
   return (
     <>
-      {theme && (
+      <div className="relative w-full h-full overflow-hidden animate__animated animate__fadeIn animate__slow">
         <div
-          style={{ background: getThemeGradient(theme) }}
-          className="relative w-full h-full overflow-hidden animate__animated animate__fadeIn animate__slow"
+          className={styles.rosterSidebar}
+          ref={sideBarRef}
+          style={
+            rosterOpen
+              ? { transform: "translateX(-300px)" }
+              : { transform: "translateX(0px)" }
+          }
+        >
+          <div className={styles.rosterContainer}>
+            <div className={styles.adminContainer}>Admin</div>
+            {roster?.map((person) => {
+              return (
+                <div>
+                  {person.admin && (
+                    <div className="font-bold">
+                      {person.firstName + " " + person.lastName}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+            <div className={styles.studentContainer}>Student</div>
+            {roster?.map((person) => {
+              return (
+                <div className={styles.rosterStudent}>
+                  {!person.admin && (
+                    <>
+                      {" "}
+                      <div>{person.firstName + " " + person.lastName}</div>
+                      {roster[0].userId == userId && (
+                        <UserMinusIcon
+                          className={styles.deletePerson}
+                          onClick={() => {
+                            leaveRoom(person.userId);
+                          }}
+                          width="15"
+                          height="15"
+                          color="white"
+                        ></UserMinusIcon>
+                      )}
+                    </>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+        <div
+          ref={containerRef}
+          className={`flex flex-col space-y-4 overflow-y-auto overflow-x-hidden h-[85%] mr-[5px] relative ${styles.scrollbarthin}`}
         >
           <div
-            className={styles.rosterSidebar}
-            ref={sideBarRef}
-            style={
-              rosterOpen
-                ? { transform: "translateX(-300px)" }
-                : { transform: "translateX(0px)" }
-            }
+            ref={navBarRef}
+            className={`w-[90%] h-[50px] min-h-[50px] text-2xl font-bold bg-white rounded-xl text-black mt-[5px] shadow-md px-3 py-2 sticky top-5 mx-auto flex items-center border-1 border-black justify-between ${styles.navbarContainer}`}
           >
-            <div className={styles.rosterContainer}>
-              <div className={styles.adminContainer}>Admin</div>
-              {roster?.map((person) => {
-                return (
-                  <div>
-                    {person.admin && (
-                      <div className="font-bold">
-                        {person.firstName + " " + person.lastName}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-              <div className={styles.studentContainer}>Student</div>
-              {roster?.map((person) => {
-                return (
-                  <div className={styles.rosterStudent}>
-                    {!person.admin && (
-                      <>
-                        {" "}
-                        <div>{person.firstName + " " + person.lastName}</div>
-                        {roster[0].userId == userId && (
-                          <UserMinusIcon
-                            className={styles.deletePerson}
-                            onClick={() => {
-                              leaveRoom(person.userId);
-                            }}
-                            width="15"
-                            height="15"
-                            color="white"
-                          ></UserMinusIcon>
-                        )}
-                      </>
-                    )}
-                  </div>
-                );
-              })}
+            <div className={styles.navbarLeft}>
+              <ArrowLeftCircleIcon
+                height={25}
+                width={25}
+                className="inline mr-5 hover:cursor-pointer"
+                onClick={() => {
+                  window.location.href = "/rooms";
+                }}
+              ></ArrowLeftCircleIcon>
+              <p className="m-0">Room:&nbsp;</p>
+              <p className="m-0">{roomName}</p>
             </div>
-          </div>
-          <div
-            ref={containerRef}
-            className={`flex flex-col space-y-4 overflow-auto h-[85%] mr-[5px] relative ${styles.scrollbarthin}`}
-          >
-            <div
-              ref={navBarRef}
-              className={`w-[90%] h-[50px] min-h-[50px] text-2xl font-bold bg-white rounded-xl text-black mt-[5px] shadow-md px-3 py-2 sticky top-5 mx-auto flex items-center border-1 border-black justify-between ${styles.navbarContainer}`}
-            >
-              <div className={styles.navbarLeft}>
-                <ArrowLeftCircleIcon
-                  height={25}
-                  width={25}
-                  className="inline mr-5 hover:cursor-pointer"
-                  onClick={() => {
-                    window.location.href = "/rooms";
+            <div className={styles.navbarRight}>
+              {roster && roster[0].userId == userId && (
+                <select
+                  className="w-[50%] md:text-xl text-base mr-[7%]"
+                  name="theme"
+                  id="theme"
+                  onChange={(event) => {
+                    changeTheme(event.target.value);
                   }}
-                ></ArrowLeftCircleIcon>
-                <p className="m-0">Room:&nbsp;</p>
-                <p className="m-0">{roomName}</p>
-              </div>
+                >
+                  <option value="default">Default</option>
+                  <option value="halloween">Halloween</option>
+                  <option value="easter">Easter</option>
+                  <option value="summer">Summer</option>
+                  <option value="christmas">Christmas</option>
+                </select>
+              )}
               <button
                 onClick={() => {
                   setRosterOpen((prev) => {
                     return !prev;
                   });
                 }}
-                className="text-white rounded-md p-[5px] bg-[rgb(100,90,165)] mr-[5px]"
+                className="text-white rounded-md p-[5px] bg-[rgb(100,90,165)] mr-[5px] text-base md:text-xl"
               >
                 Roster
               </button>
             </div>
-            <div className="min-h-[30px]"></div>
-            <AnimatePresence>
-              {messages.map((msg, index) => (
-                <motion.li
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.3, delay: 0.2 }}
-                  key={index}
-                  className={`flex items-start mx-4 ${
-                    msg.id === userId ? "justify-end" : ""
-                  }`}
-                >
-                  {
-                    <div
-                      className={`text-black px-2 py-1 rounded-xl max-w-xs break-words border-white border-[1px] ${
-                        msg.flagged ? "bg-red-200" : "bg-white"
-                      }`}
+          </div>
+          <div className="min-h-[30px]"></div>
+          <AnimatePresence>
+            {messages.map((msg, index) => (
+              <motion.li
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3, delay: 0.2 }}
+                key={index}
+                className={`flex items-start mx-4 ${
+                  msg.id === userId ? "justify-end" : ""
+                }`}
+              >
+                {
+                  <div
+                    className={`text-black px-2 py-1 rounded-xl max-w-xs break-words border-white border-[1px] ${
+                      msg.flagged ? "bg-red-200" : "bg-white"
+                    }`}
+                  >
+                    <p
+                      className="px-3 py-1 font-bold rounded-xl w-fit"
+                      style={{
+                        backgroundColor: stringToColor(msg.name),
+                        color: "white",
+                      }}
                     >
-                      <p
-                        className="px-3 py-1 font-bold rounded-xl w-fit"
-                        style={{
-                          backgroundColor: stringToColor(msg.name),
-                          color: "white",
-                        }}
-                      >
-                        {msg.name}
-                      </p>
-                      {msg.image ? (
-                        <img src={msg.message}></img>
-                      ) : (
-                        <p>{msg.message}</p>
-                      )}
-                      {msg.flagged && userId && (
-                        <>
+                      {msg.name}
+                    </p>
+                    {msg.image ? (
+                      <img src={msg.message}></img>
+                    ) : (
+                      <p>{msg.message}</p>
+                    )}
+                    {msg.flagged && userId && (
+                      <>
+                        <button
+                          onClick={() => deleteMessage(userId, msg.messageId)}
+                          className="px-3 py-2 text-white transition bg-red-400 rounded-lg hover:bg-red-500"
+                        >
+                          <XMarkIcon className="inline w-6 h-6" />
+                        </button>
+                        {roster && roster[0] && roster[0].userId == userId && (
                           <button
-                            onClick={() => deleteMessage(userId, msg.messageId)}
-                            className="px-3 py-2 text-white transition bg-red-400 rounded-lg hover:bg-red-500"
+                            onClick={() =>
+                              approveMessage(userId, msg.messageId)
+                            }
+                            className="px-3 py-2 text-white transition bg-green-400 rounded-lg hover:bg-green-500"
                           >
-                            <XMarkIcon className="inline w-6 h-6" />
+                            <CheckIcon className="inline w-6 h-6" />
                           </button>
-                          {roster &&
-                            roster[0] &&
-                            roster[0].userId == userId && (
-                              <button
-                                onClick={() =>
-                                  approveMessage(userId, msg.messageId)
-                                }
-                                className="px-3 py-2 text-white transition bg-green-400 rounded-lg hover:bg-green-500"
-                              >
-                                <CheckIcon className="inline w-6 h-6" />
-                              </button>
-                            )}
-                        </>
-                      )}
-                    </div>
-                  }
-                </motion.li>
-              ))}
-            </AnimatePresence>
-            <div className="h-[30px]"></div>
-          </div>
-
-          <div className="flex items-center space-x-2 bg-white h-[10%] justify-center rounded-xl mx-[5px] p-3 ml-[24px] mr-[33px]">
-            <label className="p-2 text-gray-700 bg-gray-200 rounded-md cursor-pointer hover:bg-gray-300">
-              {fileInput ? (
-                <img src={fileInput} className="w-[25px] h-[25px]"></img>
-              ) : (
-                <PaperClipIcon width="25" height="25"></PaperClipIcon>
-              )}
-              <input
-                onChange={(event) => {
-                  handleImageUpload(event);
-                }}
-                type="file"
-                className="hidden"
-              />
-            </label>
-            <input
-              type="text"
-              placeholder="Message"
-              value={contentInput}
-              onKeyDown={handleKeyDown}
-              onChange={(e) => setContentInput(e.target.value)}
-              className="flex-grow p-2 text-black border rounded-md"
-            />
-            <button
-              onClick={addMessage}
-              className="p-2 text-white bg-blue-500 rounded-md hover:bg-blue-600"
-            >
-              Send
-            </button>
-          </div>
+                        )}
+                      </>
+                    )}
+                  </div>
+                }
+              </motion.li>
+            ))}
+          </AnimatePresence>
+          <div className="h-[30px]"></div>
         </div>
-      )}
+
+        <div className="flex items-center space-x-2 bg-white h-[10%] justify-center rounded-xl mx-[5px] p-3 ml-[24px] mr-[33px]">
+          <label className="p-2 text-gray-700 bg-gray-200 rounded-md cursor-pointer hover:bg-gray-300">
+            {fileInput ? (
+              <img src={fileInput} className="w-[25px] h-[25px]"></img>
+            ) : (
+              <PaperClipIcon width="25" height="25"></PaperClipIcon>
+            )}
+            <input
+              onChange={(event) => {
+                handleImageUpload(event);
+              }}
+              type="file"
+              className="hidden"
+            />
+          </label>
+          <input
+            type="text"
+            placeholder="Message"
+            value={contentInput}
+            onKeyDown={handleKeyDown}
+            onChange={(e) => setContentInput(e.target.value)}
+            className="flex-grow p-2 text-black border rounded-md"
+          />
+          <button
+            onClick={addMessage}
+            className="p-2 text-white bg-blue-500 rounded-md hover:bg-blue-600"
+          >
+            Send
+          </button>
+        </div>
+      </div>
     </>
   );
 }
