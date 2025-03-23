@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense } from 'react';
 import { useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import styles from "./roomchat.module.css";
@@ -16,7 +17,7 @@ import {
   UserMinusIcon,
 } from "@heroicons/react/24/outline";
 
-export default function Roomchat() {
+function RoomchatInner() {
   // URL parameters
   const searchParams = useSearchParams();
   const roomName = searchParams.get("roomname");
@@ -350,5 +351,14 @@ export default function Roomchat() {
         </button>
       </div>
     </div>
+  );
+}
+
+
+export default function Roomchat() {
+  return (
+    <Suspense fallback={<div>Loading room chat...</div>}>
+      <RoomchatInner />
+    </Suspense>
   );
 }
