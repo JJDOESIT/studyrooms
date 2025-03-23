@@ -26,6 +26,8 @@ export default function Rooms() {
   }>>(null);
   const joinInputRef = useRef<HTMLInputElement | null>(null);
   const createRoomRef = useRef<HTMLInputElement | null>(null);
+  const [alertMessage, setAlertMessage] = useState("");
+  const [alertType, setAlertType] = useState("");
 
   // Create a room
   async function createRoom() {
@@ -48,6 +50,12 @@ export default function Rooms() {
     if (data.status == 200) {
       setDisplayOption("");
       fetchAllRooms();
+    } else if (data.status == 401) {
+      setAlertMessage("Room name must be between 1-75 characters!");
+      setAlertType("error");
+    } else {
+      setAlertMessage("Server error!");
+      setAlertType("error");
     }
   }
 
@@ -161,6 +169,12 @@ export default function Rooms() {
     if (data.status == 200) {
       setDisplayOption("");
       fetchAllRooms();
+    } else if (data.status == 401) {
+      setAlertMessage("Invalid room code!");
+      setAlertType("error");
+    } else {
+      setAlertMessage("Server error!");
+      setAlertType("error");
     }
   }
 
@@ -213,6 +227,8 @@ export default function Rooms() {
               if (createRoomRef && createRoomRef.current) {
                 createRoomRef.current.value = "";
               }
+              setAlertMessage("");
+              setAlertType("");
             }}
           >
             Create Room
@@ -226,6 +242,8 @@ export default function Rooms() {
               if (joinInputRef && joinInputRef.current) {
                 joinInputRef.current.value = "";
               }
+              setAlertMessage("");
+              setAlertType("");
             }}
           >
             Join Room
@@ -274,6 +292,14 @@ export default function Rooms() {
             Create
           </Button>
         </div>
+        {alertType == "error" && (
+          <div
+            className="alert alert-danger alert-dismissible fade show"
+            role="alert"
+          >
+            <strong>Error: </strong> {alertMessage}
+          </div>
+        )}
       </div>
       <div
         className={styles.joinRoomContainer}
@@ -317,6 +343,14 @@ export default function Rooms() {
             Join
           </Button>
         </div>
+        {alertType == "error" && (
+          <div
+            className="alert alert-danger alert-dismissible fade show"
+            role="alert"
+          >
+            <strong>Error: </strong> {alertMessage}
+          </div>
+        )}
       </div>
       {rooms?.map((room) => {
         return (
