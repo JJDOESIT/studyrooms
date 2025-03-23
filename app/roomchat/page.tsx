@@ -13,6 +13,7 @@ import {
   CheckIcon,
   PaperClipIcon,
   XMarkIcon,
+  UserMinusIcon,
 } from "@heroicons/react/24/outline";
 
 export default function Roomchat() {
@@ -95,7 +96,6 @@ export default function Roomchat() {
         setContentInput("");
       }
       if (fileInput) {
-        console.log(fileInput);
         sendMessage(userId, roomId, fileInput, true);
         setFileInput("");
       }
@@ -122,7 +122,6 @@ export default function Roomchat() {
     const data = await response.json();
 
     if (data.status == 200) {
-      console.log(data.data);
       setRoster(data.data);
     }
   }
@@ -143,11 +142,34 @@ export default function Roomchat() {
     reader.onloadend = () => {
       if (reader.result && typeof reader.result === "string") {
         // Convert image to base64 string and set it
-        console.log(reader.result);
         setFileInput(reader.result);
       }
     };
   };
+
+  // Leave a room
+  async function leaveRoom(userId: number) {
+    const response = await fetch(
+      process.env.NEXT_PUBLIC_BASE_URL + "api/py/leave-room",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ userId: userId, roomId: roomId }),
+      }
+    );
+    if (!response.ok) {
+      console.log(response.status);
+      return;
+    }
+
+    const data = await response.json();
+
+    if (data.status == 200) {
+      fetchRoster(roomId);
+    }
+  }
 
   return (
     <div className="relative w-full h-full overflow-hidden animate__animated animate__fadeIn animate__slow">
@@ -176,9 +198,23 @@ export default function Roomchat() {
           <div className={styles.studentContainer}>Student</div>
           {roster?.map((person) => {
             return (
-              <div>
+              <div className={styles.rosterStudent}>
                 {!person.admin && (
-                  <div>{person.firstName + " " + person.lastName}</div>
+                  <>
+                    {" "}
+                    <div>{person.firstName + " " + person.lastName}</div>
+                    {roster[0].userId == userId && (
+                      <UserMinusIcon
+                        className={styles.deletePerson}
+                        onClick={() => {
+                          leaveRoom(person.userId);
+                        }}
+                        width="15"
+                        height="15"
+                        color="white"
+                      ></UserMinusIcon>
+                    )}
+                  </>
                 )}
               </div>
             );
