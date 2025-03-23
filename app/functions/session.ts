@@ -7,3 +7,8 @@ export async function getUserId() {
             return session.id;
         }
 }
+
+export async function loggedIn() {
+    const session = await getSession();
+    return session != null;
+}

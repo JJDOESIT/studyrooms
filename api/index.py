@@ -11,7 +11,7 @@ import os
 
 
 load_dotenv()  # Load environment variables from .env
-client = openai.OpenAI(api_key=os.getenv("OPENAI_KEY"))  # Ensure you have an API client instance
+client = openai.OpenAI(api_key="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")  # Ensure you have an API client instance
     
 
 def is_safe_for_work(message, threshold=0.01):  # Set sensitivity level
@@ -374,6 +374,8 @@ async def fetch_messages(data: SendMessage):
             return {"status": 401, "error": "Not a member of that room!"}
         
         sfw  = is_safe_for_work(data.content)
+
+        print(data.content)
 
         message = await prisma.message.create(
             data={

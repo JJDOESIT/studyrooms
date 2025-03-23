@@ -172,7 +172,7 @@ export default function Rooms() {
   }, [userEmail]);
 
   return (
-    <div className={styles.pageContainer}>
+    <div className={`${styles.pageContainer} animate__animated animate__fadeIn animate__slow`}>
       <div className={styles.initialButtonContainer}>
         <div>
           <Button

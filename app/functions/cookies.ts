@@ -103,3 +103,10 @@ export async function updateSession(request: NextRequest) {
   });
   return result;
 }
+
+export async function logout() {
+  cookies().set("session", "", {
+    expires: new Date(0), // Expire immediately
+    httpOnly: true,
+  });
+}

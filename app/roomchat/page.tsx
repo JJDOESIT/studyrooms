@@ -7,6 +7,7 @@ import { stringToColor } from '../functions/colors';
 import { getMessages, Message, sendMessage } from '../functions/messages';
 import { getUserId } from '../functions/session';
 import { userAgent } from 'next/server';
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function Roomchat() {
     // URL parameters
@@ -57,17 +58,23 @@ export default function Roomchat() {
     };
 
     return (
-        <div className='w-full h-full'>
+        <div className='w-full h-full animate__animated animate__fadeIn animate__slow'>
             <div className='w-full h-[5%] text-2xl font-bold'>
                 {roomName}
             </div>
             <div ref={containerRef} className={`flex flex-col space-y-4 overflow-auto h-[85%] mr-[5px] ${styles.scrollbarthin}`}>
                 <div className='h-[30px]'></div>
+                <AnimatePresence>
                 {messages.map((msg, index) => (
-                    <div 
-                        key={index} 
-                        className={`flex items-start mx-4 ${msg.id === userId ? 'justify-end' : ''}`}
+                    <motion.li
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    transition={{ duration: 0.3 }}
+                    key={index} 
+                    className={`flex items-start mx-4 ${msg.id === userId ? 'justify-end' : ''}`}
                     >
+                    {
                         <div 
                             className={`text-black px-2 py-1 rounded-xl max-w-xs break-words border-white border-[1px] bg-white`}
                         >
@@ -77,8 +84,10 @@ export default function Roomchat() {
                             >{msg.name}</p>
                             <p>{msg.content}</p>
                         </div>
-                    </div>
+                    }
+                    </motion.li>
                 ))}
+                </AnimatePresence>
                 <div className='h-[30px]'></div>
             </div>
             
