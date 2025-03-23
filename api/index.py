@@ -37,6 +37,7 @@ class LoginUser(BaseModel):
 
 class CreateRoom(BaseModel):
     email: str
+    title: str
 
 
 class FetchAllRooms(BaseModel):
@@ -145,7 +146,7 @@ async def create_room(user: CreateRoom):
         await prisma.query_raw(
             'INSERT INTO "Room" ("roomId", "title", "adminId") VALUES ($1, $2, $3)',
             roomId,
-            "Test",
+            user.title,
             userId,
         )
 

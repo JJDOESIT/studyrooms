@@ -9,7 +9,8 @@ import Button from "@/components/Button";
 export default function Rooms() {
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [title, setTitle] = useState("");
-  const [displayOption, setDisplayOption] = useState(""); // create/join
+  const [roomCode, setRoomCode] = useState("");
+  const [displayOption, setDisplayOption] = useState("");
   const [rooms, setRooms] = useState<null | Array<{
     roomId: string;
     title: string;
@@ -26,7 +27,7 @@ export default function Rooms() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email: userEmail }),
+        body: JSON.stringify({ email: userEmail, title: title }),
       }
     );
     if (!response.ok) {
@@ -36,6 +37,7 @@ export default function Rooms() {
 
     const data = await response.json();
     if (data.status == 200) {
+      setDisplayOption("");
       fetchAllRooms();
     }
   }
@@ -85,14 +87,27 @@ export default function Rooms() {
 
   return (
     <div className={styles.pageContainer}>
-      <div className={styles.initialCreateButton}>
-        <Button
-          onClick={() => {
-            setDisplayOption("create");
-          }}
-        >
-          Create Room
-        </Button>
+      <div className={styles.initialButtonContainer}>
+        <div>
+          <Button
+            onClick={() => {
+              setTitle("");
+              setDisplayOption("create");
+            }}
+          >
+            Create Room
+          </Button>
+        </div>
+        <div>
+          <Button
+            onClick={() => {
+              setRoomCode("");
+              setDisplayOption("join");
+            }}
+          >
+            Join Room
+          </Button>
+        </div>
       </div>
       <div
         className={styles.createRoomContainer}
@@ -105,14 +120,68 @@ export default function Rooms() {
           className={styles.titleInput}
           type="text"
           placeholder="CSIS 3710"
+          onChange={(event) => {
+            setTitle(event.target.value);
+          }}
         ></input>
-        <div className={styles.initialCreateButton}>
+        <div className={styles.createButtonContainer}>
           <Button
+            bgColor="bg-red-200"
+            hoverFromColor="from-white"
+            hoverToColor="to-red-200"
+            onClick={() => {
+              setDisplayOption("");
+            }}
+          >
+            Back
+          </Button>
+          <Button
+            bgColor="bg-green-200"
+            hoverFromColor="from-white"
+            hoverToColor="to-green-200"
             onClick={() => {
               createRoom();
             }}
           >
             Create
+          </Button>
+        </div>
+      </div>
+      <div
+        className={styles.joinRoomContainer}
+        style={displayOption == "join" ? { opacity: 1 } : { opacity: 0 }}
+      >
+        <label className={styles.roomCodeLabel}>
+          Class Name <span>*</span>
+        </label>
+        <input
+          className={styles.roomCodeInput}
+          type="text"
+          placeholder="ABCDEF"
+          onChange={(event) => {
+            setRoomCode(event.target.value);
+          }}
+        ></input>
+        <div className={styles.joinButtonContainer}>
+          <Button
+            bgColor="bg-red-200"
+            hoverFromColor="from-white"
+            hoverToColor="to-red-200"
+            onClick={() => {
+              setDisplayOption("");
+            }}
+          >
+            Back
+          </Button>
+          <Button
+            bgColor="bg-green-200"
+            hoverFromColor="from-white"
+            hoverToColor="to-green-200"
+            onClick={() => {
+              createRoom();
+            }}
+          >
+            Join
           </Button>
         </div>
       </div>
