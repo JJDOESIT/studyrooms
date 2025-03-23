@@ -1,11 +1,11 @@
 "use client";
 
-import { useSearchParams } from 'next/navigation'
-import { useEffect, useRef, useState } from 'react';
-import styles from './roomchat.module.css'
-import { stringToColor } from '../functions/colors';
-import { getMessages, Message, sendMessage } from '../functions/messages';
-import { getUserId } from '../functions/session';
+import { useSearchParams } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
+import styles from "./roomchat.module.css";
+import { stringToColor } from "../functions/colors";
+import { getMessages, Message, sendMessage } from "../functions/messages";
+import { getUserId } from "../functions/session";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeftCircleIcon, ArrowLeftIcon, ArrowUturnLeftIcon } from '@heroicons/react/24/outline';
 
@@ -24,13 +24,12 @@ export default function Roomchat() {
   // Ref to the messages container for scrolling
   const containerRef = useRef<HTMLDivElement | null>(null);
 
-//   // Scroll to the bottom whenever a new message appears
-//   useEffect(() => {
-//     if (containerRef.current) {
-//       containerRef.current.scrollTop = containerRef.current.scrollHeight;
-//     }
-//   }, [messages]);
-
+  //   // Scroll to the bottom whenever a new message appears
+  //   useEffect(() => {
+  //     if (containerRef.current) {
+  //       containerRef.current.scrollTop = containerRef.current.scrollHeight;
+  //     }
+  //   }, [messages]);
 
   // query user id on page load
   useEffect(() => {
@@ -53,15 +52,15 @@ export default function Roomchat() {
 
   useEffect(() => {
     if (messages.length > prevLength.current) {
-        if (containerRef.current) {
-            containerRef.current.scrollTo({
-                top: containerRef.current.scrollHeight,
-                behavior: "smooth",
-            });
-        }
+      if (containerRef.current) {
+        containerRef.current.scrollTo({
+          top: containerRef.current.scrollHeight,
+          behavior: "smooth",
+        });
       }
-      prevLength.current = messages.length;
-    }, [messages]);
+    }
+    prevLength.current = messages.length;
+  }, [messages]);
 
   const handleKeyDown = (event: any) => {
     if (event.key === "Enter") {

@@ -12,3 +12,10 @@
     background-color: #fbfbfb; /* Customize the thumb color */
     border-radius: 10px; /* Optional: round corners of the thumb */
   }
+
+  .rosterSideBarContainer{
+    position: absolute;
+    background-color: red;
+    top: 10%;
+    bottom: -10%;
+  }
