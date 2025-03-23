@@ -1,4 +1,4 @@
-'use client'
+"use client";
 
 import { useSearchParams } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react';
@@ -10,52 +10,53 @@ import { userAgent } from 'next/server';
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function Roomchat() {
-    // URL parameters
-    const searchParams = useSearchParams()
-    const roomName = searchParams.get('roomname')
-    const roomId = searchParams.get('room') as string
+  // URL parameters
+  const searchParams = useSearchParams();
+  const roomName = searchParams.get("roomname");
+  const roomId = searchParams.get("room") as string;
 
-    // State to track the input fields, message array, and current_user
-    const [contentInput, setContentInput] = useState<string>('');
-    const [messages, setMessages] = useState<Message[]>([]);
-    const [userId, setuserId] = useState<number>();
+  // State to track the input fields, message array, and current_user
+  const [contentInput, setContentInput] = useState<string>("");
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [userId, setuserId] = useState<number>();
 
-    // Ref to the messages container for scrolling
-    const containerRef = useRef<HTMLDivElement | null>(null);
+  // Ref to the messages container for scrolling
+  const containerRef = useRef<HTMLDivElement | null>(null);
 
-    // Scroll to the bottom whenever a new message appears
-    useEffect(() => {
-        if (containerRef.current) {
-            containerRef.current.scrollTop = containerRef.current.scrollHeight;
-        }
-    }, [messages]);
+  // Scroll to the bottom whenever a new message appears
+  useEffect(() => {
+    if (containerRef.current) {
+      containerRef.current.scrollTop = containerRef.current.scrollHeight;
+    }
+  }, [messages]);
 
+  // query user id on page load
+  useEffect(() => {
+    getUserId().then((data: any) => {
+      setuserId(data);
+    });
+  }, []);
 
-    // query user id on page load
-    useEffect(() => {
-        getUserId().then((data : any) => {
-            setuserId(data);
-        })
-    }, []);
+  // load messages once every second
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (userId) {
+        getMessages(userId, roomId).then((data) => {
+          setMessages(data);
+        });
+      }
+    }, 100);
 
-    // load messages once every second
-    useEffect(() => {
-        const interval = setInterval(() => {
-          if (userId) {
-            getMessages(userId, roomId).then((data) => {setMessages(data)});
-          }
-        }, 100);
-    
-        return () => clearInterval(interval); // Cleanup on unmount
-      }, [userId]);
-    
-    // Function to handle adding a new message
-    const addMessage = () => {
-        if (contentInput && userId) {
-            sendMessage(userId, roomId, contentInput);
-            setContentInput('');
-        }
-    };
+    return () => clearInterval(interval); // Cleanup on unmount
+  }, [userId]);
+
+  // Function to handle adding a new message
+  const addMessage = () => {
+    if (contentInput && userId) {
+      sendMessage(userId, roomId, contentInput);
+      setContentInput("");
+    }
+  };
 
     return (
         <div className='w-full h-full animate__animated animate__fadeIn animate__slow'>

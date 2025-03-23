@@ -1,10 +1,10 @@
-
 import "./globals.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Inter } from "next/font/google";
 import Navbar from "@/components/Navbar";
 import HomeBg from "@/components/HomeBg";
 import "animate.css/animate.min.css";
+import Snow from "@/components/snow";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -22,10 +22,10 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <HomeBg>
+          <Snow></Snow>
           <Navbar />
-          <div className="w-full h-[90vh]">
-          {children}
-          </div>
+
+          <div className="w-full h-[90vh] z-50">{children}</div>
         </HomeBg>
       </body>
     </html>
