@@ -7,12 +7,7 @@ import { stringToColor } from "../functions/colors";
 import { getMessages, Message, sendMessage } from "../functions/messages";
 import { getUserId } from "../functions/session";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  ArrowLeftCircleIcon,
-  ArrowLeftIcon,
-  ArrowUturnLeftIcon,
-} from "@heroicons/react/24/outline";
-import Button from "@/components/Button";
+import { ArrowLeftCircleIcon } from "@heroicons/react/24/outline";
 
 export default function Roomchat() {
   // URL parameters
@@ -27,6 +22,7 @@ export default function Roomchat() {
   const [userId, setuserId] = useState<number>();
   const [rosterOpen, setRosterOpen] = useState(false);
   const sideBarRef = useRef<HTMLDivElement>(null);
+  const navBarRef = useRef<HTMLDivElement>(null);
 
   // Roster
   const [roster, setRoster] = useState<Array<{
@@ -160,7 +156,10 @@ export default function Roomchat() {
         ref={containerRef}
         className={`flex flex-col space-y-4 overflow-auto h-[85%] mr-[5px] relative ${styles.scrollbarthin}`}
       >
-        <div className="w-[90%] h-[50px] min-h-[50px] text-2xl font-bold bg-white rounded-xl text-black mt-[5px] shadow-md px-3 py-2 sticky top-5 mx-auto flex items-center border-1 border-black justify-between">
+        <div
+          ref={navBarRef}
+          className={`w-[90%] h-[50px] min-h-[50px] text-2xl font-bold bg-white rounded-xl text-black mt-[5px] shadow-md px-3 py-2 sticky top-5 mx-auto flex items-center border-1 border-black justify-between ${styles.navbarContainer}`}
+        >
           <div className={styles.navbarLeft}>
             <ArrowLeftCircleIcon
               height={25}
@@ -173,15 +172,16 @@ export default function Roomchat() {
             <p className="m-0">Room:&nbsp;</p>
             <p className="m-0">{roomName}</p>
           </div>
-          <Button
+          <button
             onClick={() => {
               setRosterOpen((prev) => {
                 return !prev;
               });
             }}
+            className="text-white rounded-md p-[5px] bg-[rgb(100,90,165)] mr-[5px]"
           >
             Roster
-          </Button>
+          </button>
         </div>
         <div className="min-h-[30px]"></div>
         <AnimatePresence>
@@ -218,7 +218,7 @@ export default function Roomchat() {
         <div className="h-[30px]"></div>
       </div>
 
-      <div className="flex space-x-2 bg-white h-[10%] flex items-center justify-center rounded-xl mx-[5px] p-3">
+      <div className="flex space-x-2 bg-white h-[10%] flex items-center justify-center rounded-xl mx-[5px] p-3 ml-[24px] mr-[33px]">
         <input
           type="text"
           placeholder="Message"

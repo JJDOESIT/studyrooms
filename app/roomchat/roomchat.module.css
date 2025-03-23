@@ -15,7 +15,7 @@
 
   .rosterSidebar{
     position: absolute;
-    background-color: rgb(35, 75, 105);
+    background-color: rgb(100, 90, 165);
     top: 75px;
     bottom: -75px;
     width: 300px;
@@ -61,3 +61,15 @@
     display: flex;
     align-items: center;
   }
+
+  .navbarContainer {
+    opacity: 0.3;
+    transform: translateY(-10px);
+    transition: opacity 300ms ease-in-out, transform 300ms ease-in-out;
+  }
+  
+  .navbarContainer:hover {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
